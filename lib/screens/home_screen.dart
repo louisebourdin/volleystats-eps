@@ -105,6 +105,12 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Créé par Louise',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
                   const SizedBox(height: 12),
                 ],
               ),
