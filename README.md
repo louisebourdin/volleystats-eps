@@ -16,6 +16,29 @@ Sur Windows, générer un exécutable desktop nécessite que le **Mode développ
 activé (Paramètres > Confidentialité et sécurité > Pour les développeurs), sans quoi
 `flutter pub get`/`flutter run -d windows` échoue avec une erreur de lien symbolique.
 
+## Déploiement (mise à jour automatique de l'app en ligne)
+
+Ce dépôt GitHub est connecté à Netlify (site `moonlit-youtiao-44fcd5.netlify.app`,
+alias public : https://moonlit-youtiao-44fcd5.netlify.app) en déploiement continu :
+
+- **Chaque `git push` sur la branche `main` déclenche automatiquement** un nouveau
+  build et republie le site — pas besoin de builder ni déployer manuellement.
+- Netlify n'a pas Flutter préinstallé : la commande de build (configurée dans les
+  paramètres du site Netlify, onglet "Build & deploy") clone le SDK Flutter stable à
+  chaque build avant de lancer `flutter build web`. C'est normal si un déploiement
+  prend 2 à 4 minutes.
+- Pour vérifier qu'un déploiement a réussi : dashboard Netlify du projet → onglet
+  "Deploys" → dernier déploiement → logs.
+
+**Workflow pour modifier l'app depuis n'importe quelle session Claude Code** (y compris
+depuis un autre appareil) :
+
+1. `git clone https://github.com/louisebourdin/volleystats-eps.git`
+2. Faire les modifications, tester localement (`flutter analyze`, `flutter test`,
+   `flutter run -d chrome`)
+3. `git add -A && git commit -m "..." && git push`
+4. Le site public se met à jour tout seul en 1-4 minutes.
+
 ## Utilisation rapide
 
 Depuis l'accueil : **Nouvelle série** → renseigner l'élève → toucher le terrain après
