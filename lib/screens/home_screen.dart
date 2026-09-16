@@ -107,7 +107,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   const Text(
-                    'Créé par Louise',
+                    'Créé par Louise, Yovanne et Yanis',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
