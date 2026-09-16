@@ -1,0 +1,28 @@
+name: Ouvrir automatiquement une PR pour les branches claude/*
+
+on:
+  push:
+    branches:
+      - "claude/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create PR if none exists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existing=$(gh pr list --base main --head "$GITHUB_REF_NAME" --state open --json number --jq 'length')
+          if [ "$existing" = "0" ]; then
+            gh pr create --base main --head "$GITHUB_REF_NAME" \
+              --title "Auto: $GITHUB_REF_NAME" \
+              --body "PR ouverte automatiquement. Merger pour déployer sur Netlify."
+          fi
