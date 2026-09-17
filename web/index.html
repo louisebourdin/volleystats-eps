@@ -43,15 +43,5 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script src="flutter_bootstrap.js" async></script>
-
-  <!-- Cache maison pour le fonctionnement hors-ligne (le mecanisme -->
-  <!-- automatique de Flutter est desactive dans cette version). -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('custom_sw.js');
-      });
-    }
-  </script>
 </body>
 </html>
