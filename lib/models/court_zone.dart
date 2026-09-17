@@ -21,6 +21,23 @@ class CourtZones {
     piscine,
   ];
 
+  /// Zones proches du filet : un service qui y atterrit est un service "court".
+  static const List<String> shortZones = [zone2, zone3, zone4];
+
+  /// Zones proches de la ligne de fond : un service qui y atterrit est un service "long".
+  static const List<String> longZones = [zone5, zone6, zone1];
+
+  static bool isShort(String zoneId) => shortZones.contains(zoneId);
+
+  static bool isLong(String zoneId) => longZones.contains(zoneId);
+
+  /// 'Service court' / 'Service long', ou null pour la Piscine (ni court ni long).
+  static String? depthLabel(String zoneId) {
+    if (isShort(zoneId)) return 'Service court';
+    if (isLong(zoneId)) return 'Service long';
+    return null;
+  }
+
   static String label(String zoneId) {
     if (zoneId == piscine) return 'Piscine';
     return 'Zone ${zoneId.replaceAll('zone', '')}';

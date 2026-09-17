@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/court_zone.dart';
 import '../models/serve_draft.dart';
 import '../models/serve_enums.dart';
 import '../providers/session_provider.dart';
@@ -20,47 +21,6 @@ class ServeForm extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _ImpactStatus(draft: draft),
-        const SizedBox(height: 20),
-        const _SectionLabel('Type de service'),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: ServeTypes.all
-              .map(
-                (t) => ChoiceChip(
-                  label: Text(t.label),
-                  avatar: Icon(t.icon, size: 18),
-                  selected: draft.serveTypeId == t.id,
-                  onSelected: (_) => notifier.updateDraft((d) => d.copyWith(serveTypeId: t.id)),
-                ),
-              )
-              .toList(),
-        ),
-        const SizedBox(height: 20),
-        const _SectionLabel('Trajectoire'),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _BigToggle(
-                label: 'Rapide',
-                icon: Icons.flash_on_rounded,
-                selected: draft.trajectory == ServeTrajectory.tendue,
-                onTap: () => notifier.updateDraft((d) => d.copyWith(trajectory: ServeTrajectory.tendue)),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _BigToggle(
-                label: 'Lente',
-                icon: Icons.arrow_upward_rounded,
-                selected: draft.trajectory == ServeTrajectory.cloche,
-                onTap: () => notifier.updateDraft((d) => d.copyWith(trajectory: ServeTrajectory.cloche)),
-              ),
-            ),
-          ],
-        ),
         const SizedBox(height: 20),
         const _SectionLabel('Ligne de fond mordue ?'),
         const SizedBox(height: 8),
@@ -87,6 +47,47 @@ class ServeForm extends ConsumerWidget {
             ),
           ],
         ),
+        const SizedBox(height: 20),
+        const _SectionLabel('Type de service'),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: ServeTypes.all
+              .map(
+                (t) => ChoiceChip(
+                  label: Text(t.label),
+                  avatar: Icon(t.icon, size: 18),
+                  selected: draft.serveTypeId == t.id,
+                  onSelected: (_) => notifier.updateDraft((d) => d.copyWith(serveTypeId: t.id)),
+                ),
+              )
+              .toList(),
+        ),
+        const SizedBox(height: 20),
+        const _SectionLabel('Trajectoire'),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _BigToggle(
+                label: 'Tendu',
+                icon: Icons.flash_on_rounded,
+                selected: draft.trajectory == ServeTrajectory.tendue,
+                onTap: () => notifier.updateDraft((d) => d.copyWith(trajectory: ServeTrajectory.tendue)),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _BigToggle(
+                label: 'Cloche',
+                icon: Icons.arrow_upward_rounded,
+                selected: draft.trajectory == ServeTrajectory.cloche,
+                onTap: () => notifier.updateDraft((d) => d.copyWith(trajectory: ServeTrajectory.cloche)),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 12),
         Theme(
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -96,7 +97,7 @@ class ServeForm extends ConsumerWidget {
             childrenPadding: const EdgeInsets.only(bottom: 12),
             children: [
               _OptionalEnumSection<TossQuality>(
-                label: 'Qualité du lancer de balle',
+                label: 'Qualité du lancer de balle (si hors service cuillère)',
                 values: TossQuality.values,
                 labelOf: (v) => v.label,
                 selected: draft.tossQuality,
@@ -160,7 +161,9 @@ class _ImpactStatus extends StatelessWidget {
       case ServeResult.inCourt:
         color = AppColors.success;
         icon = Icons.check_circle_rounded;
-        text = 'IN — ${draft.zone == 'piscine' ? 'Piscine' : 'Zone ${draft.zone?.replaceAll('zone', '')}'}';
+        final depthLabel = draft.zone != null ? CourtZones.depthLabel(draft.zone!) : null;
+        text = 'IN — ${draft.zone == 'piscine' ? 'Piscine' : 'Zone ${draft.zone?.replaceAll('zone', '')}'}'
+            '${depthLabel != null ? ' ($depthLabel)' : ''}';
         break;
       case ServeResult.out:
         color = AppColors.error;

@@ -56,4 +56,12 @@ class ServeAnalysis {
 
   List<MapEntry<String, int>> get zoneCountsOrdered =>
       CourtZones.orderedForStats.map((z) => MapEntry(z, zoneCounts[z] ?? 0)).toList();
+
+  /// Nombre de services IN dans une zone courte (2, 3, 4).
+  int get shortServeCount =>
+      zoneCounts.entries.where((e) => CourtZones.isShort(e.key)).fold(0, (sum, e) => sum + e.value);
+
+  /// Nombre de services IN dans une zone longue (5, 6, 1).
+  int get longServeCount =>
+      zoneCounts.entries.where((e) => CourtZones.isLong(e.key)).fold(0, (sum, e) => sum + e.value);
 }

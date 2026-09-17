@@ -303,6 +303,7 @@ class _ConfirmationView extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       '${ServeTypes.byId(serve.serveTypeId).label} · ${serve.trajectory.shortLabel}'
+                      '${serve.zone != null && CourtZones.depthLabel(serve.zone!) != null ? ' · ${CourtZones.depthLabel(serve.zone!)}' : ''}'
                       '${serve.footFault ? ' · Ligne mordue' : ''}',
                       style: const TextStyle(color: AppColors.textSecondary),
                     ),

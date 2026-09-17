@@ -106,6 +106,8 @@ class ResultsScreen extends ConsumerWidget {
       StatisticCard(
         title: 'Précision — zones visées',
         icon: Icons.grid_view_rounded,
+        subtitle: 'Services courts (2, 3, 4) : ${analysis.shortServeCount} · '
+            'Services longs (5, 6, 1) : ${analysis.longServeCount}',
         child: CategoryBarChart(
           labels: analysis.zoneCountsOrdered.map((e) => CourtZones.shortLabel(e.key)).toList(),
           values: analysis.zoneCountsOrdered.map((e) => e.value).toList(),
@@ -127,7 +129,7 @@ class ResultsScreen extends ConsumerWidget {
         title: 'Trajectoire',
         icon: Icons.show_chart_rounded,
         child: CategoryBarChart(
-          labels: const ['Rapide', 'Lente'],
+          labels: const ['Tendu', 'Cloche'],
           values: [analysis.fastTrajectoryCount, analysis.slowTrajectoryCount],
           color: AppColors.primary,
         ),

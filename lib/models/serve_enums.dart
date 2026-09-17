@@ -23,8 +23,8 @@ extension ServeResultX on ServeResult {
 enum ServeTrajectory { cloche, tendue }
 
 extension ServeTrajectoryX on ServeTrajectory {
-  String get label => this == ServeTrajectory.cloche ? 'Cloche / haute / lente' : 'Tendue / rapide';
-  String get shortLabel => this == ServeTrajectory.cloche ? 'Lente' : 'Rapide';
+  String get label => this == ServeTrajectory.cloche ? 'Cloche' : 'Tendue';
+  String get shortLabel => this == ServeTrajectory.cloche ? 'Cloche' : 'Tendu';
 
   static ServeTrajectory fromName(String name) =>
       ServeTrajectory.values.firstWhere((e) => e.name == name, orElse: () => ServeTrajectory.cloche);
