@@ -62,7 +62,7 @@ class VolleyCourtPainter extends CustomPainter {
     // de la sélection courante (couleur ET pictogramme cible, jamais la
     // couleur seule — §26).
     for (final zoneId in targetZones) {
-      if (zoneId == CourtZones.piscine) continue;
+      if (zoneId == CourtZones.piscine) continue; // dessinée séparément (forme distincte, cf. plus bas).
       final tr = CourtGeometry.rectForZone(zoneId);
       final trPx = Rect.fromPoints(_p(size, tr.left, tr.top), _p(size, tr.right, tr.bottom));
       canvas.drawRect(trPx, Paint()..color = AppColors.accent.withValues(alpha: 0.16));
@@ -124,18 +124,36 @@ class VolleyCourtPainter extends CustomPainter {
       _p(size, piscineRect.right, piscineRect.bottom),
     );
     final piscineHighlighted = highlightZone == CourtZones.piscine;
+    final piscineInTargetZones = targetZones.contains(CourtZones.piscine);
     final piscineRRect = RRect.fromRectAndRadius(piscineRectPx, const Radius.circular(12));
     canvas.drawRRect(
       piscineRRect,
-      Paint()..color = piscineHighlighted ? AppColors.primary.withValues(alpha: 0.35) : AppColors.piscineFill.withValues(alpha: 0.9),
+      Paint()
+        ..color = piscineHighlighted
+            ? AppColors.primary.withValues(alpha: 0.35)
+            : piscineInTargetZones
+                ? AppColors.accent.withValues(alpha: 0.28)
+                : AppColors.piscineFill.withValues(alpha: 0.9),
     );
     canvas.drawRRect(
       piscineRRect,
       Paint()
-        ..color = piscineHighlighted ? AppColors.primary : AppColors.primaryDark.withValues(alpha: 0.6)
+        ..color = piscineHighlighted
+            ? AppColors.primary
+            : piscineInTargetZones
+                ? AppColors.accent
+                : AppColors.primaryDark.withValues(alpha: 0.6)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = piscineHighlighted ? 2.5 : 1.6,
+        ..strokeWidth = piscineHighlighted || piscineInTargetZones ? 2.5 : 1.6,
     );
+    // Même pictogramme cible que les autres zones "à travailler" (§26 : jamais la couleur seule).
+    if (piscineInTargetZones) {
+      final badgeCenter = Offset(piscineRectPx.right - 16, piscineRectPx.top + 16);
+      final badgeRadius = (size.width * 0.028).clamp(7, 11).toDouble();
+      canvas.drawCircle(badgeCenter, badgeRadius + 2, Paint()..color = Colors.white);
+      canvas.drawCircle(badgeCenter, badgeRadius, Paint()..color = AppColors.accent);
+      canvas.drawCircle(badgeCenter, badgeRadius * 0.45, Paint()..color = Colors.white);
+    }
     if (showZoneLabels) {
       _drawText(
         canvas,

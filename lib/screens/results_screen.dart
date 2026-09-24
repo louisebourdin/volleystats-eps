@@ -117,6 +117,16 @@ class ResultsScreen extends ConsumerWidget {
             color: AppColors.warning,
           ),
         ),
+        const SizedBox(height: 16),
+        StatisticCard(
+          title: 'Zone d\'arrivée des réceptions',
+          icon: Icons.grid_view_rounded,
+          child: CategoryBarChart(
+            labels: analysis.receptionZoneCountsOrdered.map((e) => CourtZones.shortLabel(e.key)).toList(),
+            values: analysis.receptionZoneCountsOrdered.map((e) => e.value).toList(),
+            color: AppColors.accent,
+          ),
+        ),
       ],
       const SizedBox(height: 16),
       StatisticCard(

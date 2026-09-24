@@ -113,6 +113,7 @@ class SessionNotifier extends StateNotifier<SessionState> {
       contactQuality: draft.contactQuality,
       power: draft.power,
       intention: draft.intention,
+      receptionZone: draft.receptionZone,
       receptionQuality: draft.receptionQuality,
     );
 
@@ -154,6 +155,7 @@ class SessionNotifier extends StateNotifier<SessionState> {
         contactQuality: last.contactQuality,
         power: last.power,
         intention: last.intention,
+        receptionZone: last.receptionZone,
         receptionQuality: last.receptionQuality,
       ),
     );

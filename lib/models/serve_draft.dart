@@ -18,6 +18,7 @@ class ServeDraft {
   final ContactQuality? contactQuality;
   final ServePower? power;
   final ServeIntention? intention;
+  final String? receptionZone;
   final ReceptionQuality? receptionQuality;
 
   const ServeDraft({
@@ -33,6 +34,7 @@ class ServeDraft {
     this.contactQuality,
     this.power,
     this.intention,
+    this.receptionZone,
     this.receptionQuality,
   });
 
@@ -57,6 +59,7 @@ class ServeDraft {
     Object? contactQuality = _sentinel,
     Object? power = _sentinel,
     Object? intention = _sentinel,
+    Object? receptionZone = _sentinel,
     Object? receptionQuality = _sentinel,
   }) {
     return ServeDraft(
@@ -73,6 +76,7 @@ class ServeDraft {
           identical(contactQuality, _sentinel) ? this.contactQuality : contactQuality as ContactQuality?,
       power: identical(power, _sentinel) ? this.power : power as ServePower?,
       intention: identical(intention, _sentinel) ? this.intention : intention as ServeIntention?,
+      receptionZone: identical(receptionZone, _sentinel) ? this.receptionZone : receptionZone as String?,
       receptionQuality: identical(receptionQuality, _sentinel)
           ? this.receptionQuality
           : receptionQuality as ReceptionQuality?,

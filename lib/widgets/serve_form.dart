@@ -92,7 +92,29 @@ class ServeForm extends ConsumerWidget {
         ),
         if (mode == SessionMode.avecReception && draft.result == ServeResult.inCourt) ...[
           const SizedBox(height: 20),
+          const _SectionLabel('Zone d\'arrivée de la réception'),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: CourtZones.orderedForStats
+                .map(
+                  (z) => ChoiceChip(
+                    label: Text(CourtZones.label(z)),
+                    selected: draft.receptionZone == z,
+                    onSelected: (_) => notifier.updateDraft((d) => d.copyWith(receptionZone: z)),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 20),
           const _SectionLabel('Réception adverse'),
+          const SizedBox(height: 4),
+          const Text(
+            'Bonne réception : balle haute, vers le milieu de terrain (service facile). '
+            'Ace : point direct ou réception ratée (service dangereux).',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -100,7 +122,7 @@ class ServeForm extends ConsumerWidget {
             children: ReceptionQuality.values
                 .map(
                   (q) => ChoiceChip(
-                    label: Text(q.label),
+                    label: Text(q.shortLabel),
                     selected: draft.receptionQuality == q,
                     onSelected: (_) => notifier.updateDraft((d) => d.copyWith(receptionQuality: q)),
                   ),

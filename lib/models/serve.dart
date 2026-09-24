@@ -26,8 +26,10 @@ class Serve {
   final ServePower? power;
   final ServeIntention? intention;
 
-  /// Qualité de la réception adverse (mode avec réception uniquement, et
+  /// Zone (CourtZones.*, Piscine incluse) où atterrit la réception adverse,
+  /// et qualité de cette réception (mode avec réception uniquement, et
   /// seulement pour les services IN).
+  final String? receptionZone;
   final ReceptionQuality? receptionQuality;
 
   const Serve({
@@ -47,6 +49,7 @@ class Serve {
     this.contactQuality,
     this.power,
     this.intention,
+    this.receptionZone,
     this.receptionQuality,
   });
 
@@ -69,6 +72,7 @@ class Serve {
     Object? contactQuality = _sentinel,
     Object? power = _sentinel,
     Object? intention = _sentinel,
+    Object? receptionZone = _sentinel,
     Object? receptionQuality = _sentinel,
   }) {
     return Serve(
@@ -89,6 +93,7 @@ class Serve {
           identical(contactQuality, _sentinel) ? this.contactQuality : contactQuality as ContactQuality?,
       power: identical(power, _sentinel) ? this.power : power as ServePower?,
       intention: identical(intention, _sentinel) ? this.intention : intention as ServeIntention?,
+      receptionZone: identical(receptionZone, _sentinel) ? this.receptionZone : receptionZone as String?,
       receptionQuality: identical(receptionQuality, _sentinel)
           ? this.receptionQuality
           : receptionQuality as ReceptionQuality?,
@@ -112,6 +117,7 @@ class Serve {
         'contactQuality': contactQuality?.name,
         'power': power?.name,
         'intention': intention?.name,
+        'receptionZone': receptionZone,
         'receptionQuality': receptionQuality?.name,
       };
 
@@ -132,6 +138,7 @@ class Serve {
         contactQuality: ContactQualityX.fromName(json['contactQuality'] as String?),
         power: ServePowerX.fromName(json['power'] as String?),
         intention: ServeIntentionX.fromName(json['intention'] as String?),
+        receptionZone: json['receptionZone'] as String?,
         receptionQuality: ReceptionQualityX.fromName(json['receptionQuality'] as String?),
       );
 }

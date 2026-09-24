@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../models/court_zone.dart';
 import '../../models/serve_enums.dart';
 import 'court_geometry.dart';
 import 'court_marker.dart';
@@ -23,7 +22,7 @@ class VolleyCourtWidget extends StatelessWidget {
   final Set<String> targetZones;
 
   /// Mode sélection : au lieu d'enregistrer un impact, un tap sur une des 6
-  /// zones (Piscine/OUT/FILET ignorés) bascule son appartenance à
+  /// zones ou sur la Piscine (OUT/FILET ignorés) bascule son appartenance à
   /// [targetZones] via [onZoneToggle]. Utilisé sur l'écran "Nouvelle série".
   final bool zonePickerMode;
   final ValueChanged<String>? onZoneToggle;
@@ -52,9 +51,7 @@ class VolleyCourtWidget extends StatelessWidget {
               final x = (local.dx / size.width).clamp(0.0, 1.0);
               final y = (local.dy / size.height).clamp(0.0, 1.0);
               final result = CourtGeometry.resultForPoint(Offset(x, y));
-              if (result.result == ServeResult.inCourt &&
-                  result.zone != null &&
-                  result.zone != CourtZones.piscine) {
+              if (result.result == ServeResult.inCourt && result.zone != null) {
                 onZoneToggle!(result.zone!);
               }
             };
