@@ -8,6 +8,8 @@ import '../models/serve_enums.dart';
 import '../models/session.dart';
 import '../providers/history_provider.dart';
 import '../providers/session_provider.dart';
+import '../services/csv_downloader/csv_downloader.dart';
+import '../services/csv_export_service.dart';
 import '../services/recommendation_engine.dart';
 import '../services/statistics_service.dart';
 import '../theme/app_colors.dart';
@@ -81,7 +83,7 @@ class ResultsScreen extends ConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 28),
-                _ActionButtons(),
+                _ActionButtons(session: currentSession),
               ],
             ),
           ),
@@ -405,6 +407,21 @@ class _DeltaChip extends StatelessWidget {
 }
 
 class _ActionButtons extends StatelessWidget {
+  final Session session;
+  const _ActionButtons({required this.session});
+
+  Future<void> _exportCsv(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final content = CsvExportService.build(session);
+      final fileName = CsvExportService.suggestedFileName(session);
+      final resultMessage = await downloadCsv(fileName: fileName, content: content);
+      messenger.showSnackBar(SnackBar(content: Text(resultMessage)));
+    } catch (_) {
+      messenger.showSnackBar(const SnackBar(content: Text('Échec de l\'export CSV.')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -418,6 +435,12 @@ class _ActionButtons extends StatelessWidget {
           },
           icon: const Icon(Icons.replay_rounded),
           label: const Text('Nouvelle série'),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          onPressed: () => _exportCsv(context),
+          icon: const Icon(Icons.file_download_outlined),
+          label: const Text('Exporter en CSV'),
         ),
         const SizedBox(height: 10),
         TextButton.icon(
