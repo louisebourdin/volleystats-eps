@@ -49,95 +49,28 @@ extension ServeDirectionX on ServeDirection {
       ServeDirection.values.firstWhere((e) => e.name == name, orElse: () => ServeDirection.centre);
 }
 
-/// Qualité du lancer de balle (facultatif).
-enum TossQuality { bon, tropDevant, tropDerriere, tropHaut, tropBas, irregulier }
+/// Qualité du lancer de balle : défaut de placement du lancer, s'il y en a un.
+enum TossQuality { tropBas, tropDevant, tropDerriere, tropDroite, tropGauche }
 
 extension TossQualityX on TossQuality {
   String get label {
     switch (this) {
-      case TossQuality.bon:
-        return 'Bon';
+      case TossQuality.tropBas:
+        return 'Trop bas';
       case TossQuality.tropDevant:
         return 'Trop devant';
       case TossQuality.tropDerriere:
         return 'Trop derrière';
-      case TossQuality.tropHaut:
-        return 'Trop haut';
-      case TossQuality.tropBas:
-        return 'Trop bas';
-      case TossQuality.irregulier:
-        return 'Irrégulier';
+      case TossQuality.tropDroite:
+        return 'Trop à droite';
+      case TossQuality.tropGauche:
+        return 'Trop à gauche';
     }
   }
 
   static TossQuality? fromName(String? name) {
     if (name == null) return null;
     return TossQuality.values.firstWhereOrNull((e) => e.name == name);
-  }
-}
-
-/// Qualité du contact avec le ballon (facultatif).
-enum ContactQuality { centre, decentre, difficile }
-
-extension ContactQualityX on ContactQuality {
-  String get label {
-    switch (this) {
-      case ContactQuality.centre:
-        return 'Centré';
-      case ContactQuality.decentre:
-        return 'Décentré';
-      case ContactQuality.difficile:
-        return 'Contact difficile';
-    }
-  }
-
-  static ContactQuality? fromName(String? name) {
-    if (name == null) return null;
-    return ContactQuality.values.firstWhereOrNull((e) => e.name == name);
-  }
-}
-
-/// Puissance du service (facultatif).
-enum ServePower { faible, moyenne, forte }
-
-extension ServePowerX on ServePower {
-  String get label {
-    switch (this) {
-      case ServePower.faible:
-        return 'Faible';
-      case ServePower.moyenne:
-        return 'Moyenne';
-      case ServePower.forte:
-        return 'Forte';
-    }
-  }
-
-  static ServePower? fromName(String? name) {
-    if (name == null) return null;
-    return ServePower.values.firstWhereOrNull((e) => e.name == name);
-  }
-}
-
-/// Intention du service (facultatif).
-enum ServeIntention { securiser, viserZone, mettreEnDifficulte, servicePuissant }
-
-extension ServeIntentionX on ServeIntention {
-  String get label {
-    switch (this) {
-      case ServeIntention.securiser:
-        return 'Sécuriser';
-      case ServeIntention.viserZone:
-        return 'Viser une zone';
-      case ServeIntention.mettreEnDifficulte:
-        return 'Mettre en difficulté';
-      case ServeIntention.servicePuissant:
-        return 'Service puissant';
-    }
-  }
-
-  static ServeIntention? fromName(String? name) {
-    if (name == null) return null;
-    return ServeIntention.values.firstWhereOrNull((e) => e.name == name);
   }
 }
 

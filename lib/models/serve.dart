@@ -20,11 +20,8 @@ class Serve {
   final ServeTrajectory trajectory;
   final ServeDirection direction;
 
-  // Caractéristiques complémentaires facultatives.
+  /// Défaut de placement du lancer de balle, s'il y en a un (facultatif).
   final TossQuality? tossQuality;
-  final ContactQuality? contactQuality;
-  final ServePower? power;
-  final ServeIntention? intention;
 
   /// Zone (CourtZones.*, Piscine incluse) où atterrit la réception adverse,
   /// et qualité de cette réception (mode avec réception uniquement, et
@@ -46,9 +43,6 @@ class Serve {
     required this.trajectory,
     required this.direction,
     this.tossQuality,
-    this.contactQuality,
-    this.power,
-    this.intention,
     this.receptionZone,
     this.receptionQuality,
   });
@@ -69,9 +63,6 @@ class Serve {
     ServeTrajectory? trajectory,
     ServeDirection? direction,
     Object? tossQuality = _sentinel,
-    Object? contactQuality = _sentinel,
-    Object? power = _sentinel,
-    Object? intention = _sentinel,
     Object? receptionZone = _sentinel,
     Object? receptionQuality = _sentinel,
   }) {
@@ -89,10 +80,6 @@ class Serve {
       trajectory: trajectory ?? this.trajectory,
       direction: direction ?? this.direction,
       tossQuality: identical(tossQuality, _sentinel) ? this.tossQuality : tossQuality as TossQuality?,
-      contactQuality:
-          identical(contactQuality, _sentinel) ? this.contactQuality : contactQuality as ContactQuality?,
-      power: identical(power, _sentinel) ? this.power : power as ServePower?,
-      intention: identical(intention, _sentinel) ? this.intention : intention as ServeIntention?,
       receptionZone: identical(receptionZone, _sentinel) ? this.receptionZone : receptionZone as String?,
       receptionQuality: identical(receptionQuality, _sentinel)
           ? this.receptionQuality
@@ -114,9 +101,6 @@ class Serve {
         'trajectory': trajectory.name,
         'direction': direction.name,
         'tossQuality': tossQuality?.name,
-        'contactQuality': contactQuality?.name,
-        'power': power?.name,
-        'intention': intention?.name,
         'receptionZone': receptionZone,
         'receptionQuality': receptionQuality?.name,
       };
@@ -135,9 +119,6 @@ class Serve {
         trajectory: ServeTrajectoryX.fromName(json['trajectory'] as String? ?? 'cloche'),
         direction: ServeDirectionX.fromName(json['direction'] as String? ?? 'centre'),
         tossQuality: TossQualityX.fromName(json['tossQuality'] as String?),
-        contactQuality: ContactQualityX.fromName(json['contactQuality'] as String?),
-        power: ServePowerX.fromName(json['power'] as String?),
-        intention: ServeIntentionX.fromName(json['intention'] as String?),
         receptionZone: json['receptionZone'] as String?,
         receptionQuality: ReceptionQualityX.fromName(json['receptionQuality'] as String?),
       );

@@ -15,9 +15,6 @@ class ServeDraft {
   final ServeTrajectory trajectory;
   final ServeDirection? direction;
   final TossQuality? tossQuality;
-  final ContactQuality? contactQuality;
-  final ServePower? power;
-  final ServeIntention? intention;
   final String? receptionZone;
   final ReceptionQuality? receptionQuality;
 
@@ -31,9 +28,6 @@ class ServeDraft {
     this.trajectory = ServeTrajectory.tendue,
     this.direction,
     this.tossQuality,
-    this.contactQuality,
-    this.power,
-    this.intention,
     this.receptionZone,
     this.receptionQuality,
   });
@@ -56,9 +50,6 @@ class ServeDraft {
     ServeTrajectory? trajectory,
     Object? direction = _sentinel,
     Object? tossQuality = _sentinel,
-    Object? contactQuality = _sentinel,
-    Object? power = _sentinel,
-    Object? intention = _sentinel,
     Object? receptionZone = _sentinel,
     Object? receptionQuality = _sentinel,
   }) {
@@ -72,10 +63,6 @@ class ServeDraft {
       trajectory: trajectory ?? this.trajectory,
       direction: identical(direction, _sentinel) ? this.direction : direction as ServeDirection?,
       tossQuality: identical(tossQuality, _sentinel) ? this.tossQuality : tossQuality as TossQuality?,
-      contactQuality:
-          identical(contactQuality, _sentinel) ? this.contactQuality : contactQuality as ContactQuality?,
-      power: identical(power, _sentinel) ? this.power : power as ServePower?,
-      intention: identical(intention, _sentinel) ? this.intention : intention as ServeIntention?,
       receptionZone: identical(receptionZone, _sentinel) ? this.receptionZone : receptionZone as String?,
       receptionQuality: identical(receptionQuality, _sentinel)
           ? this.receptionQuality

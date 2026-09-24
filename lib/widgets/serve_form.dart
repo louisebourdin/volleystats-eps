@@ -9,7 +9,6 @@ import '../providers/session_provider.dart';
 import '../theme/app_colors.dart';
 
 /// Formulaire rapide d'un service : quelques choix à toucher, rien de plus.
-/// Les champs facultatifs (§10) sont repliés sous "Plus de détails".
 class ServeForm extends ConsumerWidget {
   const ServeForm({super.key});
 
@@ -17,12 +16,14 @@ class ServeForm extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final draft = ref.watch(sessionProvider).draft;
     final notifier = ref.read(sessionProvider.notifier);
-    final mode = ref.watch(sessionProvider).session?.mode ?? SessionMode.sansReception;
+    final session = ref.watch(sessionProvider).session;
+    final mode = session?.mode ?? SessionMode.sansReception;
+    final targetZones = session?.targetZones.toSet() ?? const {};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _ImpactStatus(draft: draft),
+        _ImpactStatus(draft: draft, targetZones: targetZones),
         const SizedBox(height: 20),
         const _SectionLabel('Ligne de fond mordue ?'),
         const SizedBox(height: 8),
@@ -90,6 +91,23 @@ class ServeForm extends ConsumerWidget {
             ),
           ],
         ),
+        const SizedBox(height: 20),
+        const _SectionLabel('Qualité du lancer de balle'),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: TossQuality.values
+              .map(
+                (q) => ChoiceChip(
+                  label: Text(q.label),
+                  selected: draft.tossQuality == q,
+                  onSelected: (isSelected) =>
+                      notifier.updateDraft((d) => d.copyWith(tossQuality: isSelected ? q : null)),
+                ),
+              )
+              .toList(),
+        ),
         if (mode == SessionMode.avecReception && draft.result == ServeResult.inCourt) ...[
           const SizedBox(height: 20),
           const _SectionLabel('Zone d\'arrivée de la réception'),
@@ -130,45 +148,6 @@ class ServeForm extends ConsumerWidget {
                 .toList(),
           ),
         ],
-        const SizedBox(height: 12),
-        Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            tilePadding: EdgeInsets.zero,
-            title: const Text('Plus de détails (facultatif)', style: TextStyle(fontWeight: FontWeight.w700)),
-            childrenPadding: const EdgeInsets.only(bottom: 12),
-            children: [
-              _OptionalEnumSection<TossQuality>(
-                label: 'Qualité du lancer de balle (si hors service cuillère)',
-                values: TossQuality.values,
-                labelOf: (v) => v.label,
-                selected: draft.tossQuality,
-                onSelected: (v) => notifier.updateDraft((d) => d.copyWith(tossQuality: v)),
-              ),
-              _OptionalEnumSection<ContactQuality>(
-                label: 'Qualité du contact',
-                values: ContactQuality.values,
-                labelOf: (v) => v.label,
-                selected: draft.contactQuality,
-                onSelected: (v) => notifier.updateDraft((d) => d.copyWith(contactQuality: v)),
-              ),
-              _OptionalEnumSection<ServePower>(
-                label: 'Puissance',
-                values: ServePower.values,
-                labelOf: (v) => v.label,
-                selected: draft.power,
-                onSelected: (v) => notifier.updateDraft((d) => d.copyWith(power: v)),
-              ),
-              _OptionalEnumSection<ServeIntention>(
-                label: 'Intention',
-                values: ServeIntention.values,
-                labelOf: (v) => v.label,
-                selected: draft.intention,
-                onSelected: (v) => notifier.updateDraft((d) => d.copyWith(intention: v)),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -176,7 +155,8 @@ class ServeForm extends ConsumerWidget {
 
 class _ImpactStatus extends StatelessWidget {
   final ServeDraft draft;
-  const _ImpactStatus({required this.draft});
+  final Set<String> targetZones;
+  const _ImpactStatus({required this.draft, required this.targetZones});
 
   @override
   Widget build(BuildContext context) {
@@ -196,27 +176,40 @@ class _ImpactStatus extends StatelessWidget {
         ),
       );
     }
+    // Zone visée choisie pour la séance, mais service tombé ailleurs : on
+    // affiche ça comme un raté (rouge), même si le service reste bien "IN"
+    // dans les statistiques — c'est juste une aide visuelle en direct.
+    final missedTargetZone = draft.result == ServeResult.inCourt &&
+        targetZones.isNotEmpty &&
+        !targetZones.contains(draft.zone);
+
     final Color color;
     final IconData icon;
     final String text;
-    switch (draft.result!) {
-      case ServeResult.inCourt:
-        color = AppColors.success;
-        icon = Icons.check_circle_rounded;
-        final depthLabel = draft.zone != null ? CourtZones.depthLabel(draft.zone!) : null;
-        text = 'IN — ${draft.zone == 'piscine' ? 'Piscine' : 'Zone ${draft.zone?.replaceAll('zone', '')}'}'
-            '${depthLabel != null ? ' ($depthLabel)' : ''}';
-        break;
-      case ServeResult.out:
-        color = AppColors.error;
-        icon = Icons.cancel_rounded;
-        text = 'OUT';
-        break;
-      case ServeResult.net:
-        color = AppColors.warning;
-        icon = Icons.block_rounded;
-        text = 'FILET';
-        break;
+    if (missedTargetZone) {
+      color = AppColors.error;
+      icon = Icons.cancel_rounded;
+      text = 'IN — ${draft.zone == 'piscine' ? 'Piscine' : 'Zone ${draft.zone?.replaceAll('zone', '')}'} (hors zone visée)';
+    } else {
+      switch (draft.result!) {
+        case ServeResult.inCourt:
+          color = AppColors.success;
+          icon = Icons.check_circle_rounded;
+          final depthLabel = draft.zone != null ? CourtZones.depthLabel(draft.zone!) : null;
+          text = 'IN — ${draft.zone == 'piscine' ? 'Piscine' : 'Zone ${draft.zone?.replaceAll('zone', '')}'}'
+              '${depthLabel != null ? ' ($depthLabel)' : ''}';
+          break;
+        case ServeResult.out:
+          color = AppColors.error;
+          icon = Icons.cancel_rounded;
+          text = 'OUT';
+          break;
+        case ServeResult.net:
+          color = AppColors.warning;
+          icon = Icons.block_rounded;
+          text = 'FILET';
+          break;
+      }
     }
     return Container(
       padding: const EdgeInsets.all(14),
@@ -282,49 +275,6 @@ class _BigToggle extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _OptionalEnumSection<T> extends StatelessWidget {
-  final String label;
-  final List<T> values;
-  final String Function(T) labelOf;
-  final T? selected;
-  final ValueChanged<T?> onSelected;
-
-  const _OptionalEnumSection({
-    required this.label,
-    required this.values,
-    required this.labelOf,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.textSecondary)),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: values
-                .map(
-                  (v) => ChoiceChip(
-                    label: Text(labelOf(v)),
-                    selected: selected == v,
-                    onSelected: (isSelected) => onSelected(isSelected ? v : null),
-                  ),
-                )
-                .toList(),
-          ),
-        ],
       ),
     );
   }

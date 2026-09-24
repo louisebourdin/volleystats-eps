@@ -93,21 +93,29 @@ class ServeScreen extends ConsumerWidget {
                       ? _ConfirmationView(serve: session.serves.last)
                       : ResponsiveBuilder(
                           builder: (context, size, constraints) {
+                            final targetZones = session.targetZones.toSet();
+                            // Service IN mais hors de la zone visée pour la séance : traité visuellement
+                            // comme un raté (rouge), même si le résultat réel reste IN dans les stats.
+                            final missedTargetZone = draft.result == ServeResult.inCourt &&
+                                targetZones.isNotEmpty &&
+                                !targetZones.contains(draft.zone);
                             final court = VolleyCourtWidget(
                               onTap: (result, x, y) => ref.read(sessionProvider.notifier).setImpact(result, x, y),
                               highlightZone: draft.zone,
-                              targetZones: session.targetZones.toSet(),
+                              targetZones: targetZones,
                               markers: draft.positionX == null || draft.positionY == null
                                   ? const []
                                   : [
                                       CourtMarker(
                                         x: draft.positionX!,
                                         y: draft.positionY!,
-                                        color: switch (draft.result) {
-                                          ServeResult.inCourt => AppColors.success,
-                                          ServeResult.net => AppColors.warning,
-                                          ServeResult.out || null => AppColors.error,
-                                        },
+                                        color: missedTargetZone
+                                            ? AppColors.error
+                                            : switch (draft.result) {
+                                                ServeResult.inCourt => AppColors.success,
+                                                ServeResult.net => AppColors.warning,
+                                                ServeResult.out || null => AppColors.error,
+                                              },
                                       ),
                                     ],
                             );
@@ -303,6 +311,7 @@ class _ConfirmationView extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       '${ServeTypes.byId(serve.serveTypeId).label} · ${serve.trajectory.shortLabel}'
+                      '${serve.tossQuality != null ? ' · ${serve.tossQuality!.label}' : ''}'
                       '${serve.zone != null && CourtZones.depthLabel(serve.zone!) != null ? ' · ${CourtZones.depthLabel(serve.zone!)}' : ''}'
                       '${serve.receptionZone != null ? ' · Réception : ${CourtZones.label(serve.receptionZone!)}' : ''}'
                       '${serve.receptionQuality != null ? ' (${serve.receptionQuality!.shortLabel})' : ''}'
