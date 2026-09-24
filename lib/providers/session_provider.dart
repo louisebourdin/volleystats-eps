@@ -41,7 +41,13 @@ class SessionState {
 class SessionNotifier extends StateNotifier<SessionState> {
   SessionNotifier() : super(const SessionState());
 
-  void startSession(Student student, {DateTime? date, List<String> targetZones = const []}) {
+  void startSession(
+    Student student, {
+    DateTime? date,
+    List<String> targetZones = const [],
+    SessionMode mode = SessionMode.sansReception,
+    List<String> receptionZones = const [],
+  }) {
     state = SessionState(
       session: Session(
         id: newId(),
@@ -49,6 +55,8 @@ class SessionNotifier extends StateNotifier<SessionState> {
         date: date ?? DateTime.now(),
         serves: const [],
         targetZones: targetZones,
+        mode: mode,
+        receptionZones: receptionZones,
       ),
       draft: ServeDraft(serveTypeId: student.mainServeTypeId),
     );
@@ -105,6 +113,7 @@ class SessionNotifier extends StateNotifier<SessionState> {
       contactQuality: draft.contactQuality,
       power: draft.power,
       intention: draft.intention,
+      receptionQuality: draft.receptionQuality,
     );
 
     final updatedSession = session.copyWith(serves: [...session.serves, serve]);
@@ -145,6 +154,7 @@ class SessionNotifier extends StateNotifier<SessionState> {
         contactQuality: last.contactQuality,
         power: last.power,
         intention: last.intention,
+        receptionQuality: last.receptionQuality,
       ),
     );
   }

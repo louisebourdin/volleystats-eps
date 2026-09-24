@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/court_zone.dart';
 import '../models/serve_draft.dart';
 import '../models/serve_enums.dart';
+import '../models/session.dart';
 import '../providers/session_provider.dart';
 import '../theme/app_colors.dart';
 
@@ -16,6 +17,7 @@ class ServeForm extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final draft = ref.watch(sessionProvider).draft;
     final notifier = ref.read(sessionProvider.notifier);
+    final mode = ref.watch(sessionProvider).session?.mode ?? SessionMode.sansReception;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,6 +90,24 @@ class ServeForm extends ConsumerWidget {
             ),
           ],
         ),
+        if (mode == SessionMode.avecReception && draft.result == ServeResult.inCourt) ...[
+          const SizedBox(height: 20),
+          const _SectionLabel('Réception adverse'),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: ReceptionQuality.values
+                .map(
+                  (q) => ChoiceChip(
+                    label: Text(q.label),
+                    selected: draft.receptionQuality == q,
+                    onSelected: (_) => notifier.updateDraft((d) => d.copyWith(receptionQuality: q)),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
         const SizedBox(height: 12),
         Theme(
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),

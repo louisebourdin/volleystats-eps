@@ -304,6 +304,7 @@ class _ConfirmationView extends StatelessWidget {
                     Text(
                       '${ServeTypes.byId(serve.serveTypeId).label} · ${serve.trajectory.shortLabel}'
                       '${serve.zone != null && CourtZones.depthLabel(serve.zone!) != null ? ' · ${CourtZones.depthLabel(serve.zone!)}' : ''}'
+                      '${serve.receptionQuality != null ? ' · ${serve.receptionQuality!.label}' : ''}'
                       '${serve.footFault ? ' · Ligne mordue' : ''}',
                       style: const TextStyle(color: AppColors.textSecondary),
                     ),

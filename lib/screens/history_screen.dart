@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/session.dart';
 import '../providers/history_provider.dart';
 import '../services/recommendation_engine.dart';
 import '../services/statistics_service.dart';
@@ -71,7 +72,8 @@ class HistoryScreen extends ConsumerWidget {
                                           style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                                       const SizedBox(height: 6),
                                       Text(
-                                        '${analysis.successRatePercent.round()} % de réussite · ${analysis.distinctZonesUsed} zone(s) · $axis',
+                                        '${analysis.successRatePercent.round()} % de réussite · ${analysis.distinctZonesUsed} zone(s)'
+                                        '${session.mode == SessionMode.avecReception ? ' · Avec réception' : ''} · $axis',
                                         style: const TextStyle(fontSize: 13),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,

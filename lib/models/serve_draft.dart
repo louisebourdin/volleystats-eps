@@ -18,6 +18,7 @@ class ServeDraft {
   final ContactQuality? contactQuality;
   final ServePower? power;
   final ServeIntention? intention;
+  final ReceptionQuality? receptionQuality;
 
   const ServeDraft({
     this.result,
@@ -32,6 +33,7 @@ class ServeDraft {
     this.contactQuality,
     this.power,
     this.intention,
+    this.receptionQuality,
   });
 
   /// Un service est enregistrable dès qu'un impact a été touché sur le terrain
@@ -55,6 +57,7 @@ class ServeDraft {
     Object? contactQuality = _sentinel,
     Object? power = _sentinel,
     Object? intention = _sentinel,
+    Object? receptionQuality = _sentinel,
   }) {
     return ServeDraft(
       result: identical(result, _sentinel) ? this.result : result as ServeResult?,
@@ -70,6 +73,9 @@ class ServeDraft {
           identical(contactQuality, _sentinel) ? this.contactQuality : contactQuality as ContactQuality?,
       power: identical(power, _sentinel) ? this.power : power as ServePower?,
       intention: identical(intention, _sentinel) ? this.intention : intention as ServeIntention?,
+      receptionQuality: identical(receptionQuality, _sentinel)
+          ? this.receptionQuality
+          : receptionQuality as ReceptionQuality?,
     );
   }
 }

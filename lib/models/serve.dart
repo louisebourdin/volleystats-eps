@@ -26,6 +26,10 @@ class Serve {
   final ServePower? power;
   final ServeIntention? intention;
 
+  /// Qualité de la réception adverse (mode avec réception uniquement, et
+  /// seulement pour les services IN).
+  final ReceptionQuality? receptionQuality;
+
   const Serve({
     required this.id,
     required this.sessionId,
@@ -43,6 +47,7 @@ class Serve {
     this.contactQuality,
     this.power,
     this.intention,
+    this.receptionQuality,
   });
 
   bool get isIn => result == ServeResult.inCourt;
@@ -64,6 +69,7 @@ class Serve {
     Object? contactQuality = _sentinel,
     Object? power = _sentinel,
     Object? intention = _sentinel,
+    Object? receptionQuality = _sentinel,
   }) {
     return Serve(
       id: id ?? this.id,
@@ -83,6 +89,9 @@ class Serve {
           identical(contactQuality, _sentinel) ? this.contactQuality : contactQuality as ContactQuality?,
       power: identical(power, _sentinel) ? this.power : power as ServePower?,
       intention: identical(intention, _sentinel) ? this.intention : intention as ServeIntention?,
+      receptionQuality: identical(receptionQuality, _sentinel)
+          ? this.receptionQuality
+          : receptionQuality as ReceptionQuality?,
     );
   }
 
@@ -103,6 +112,7 @@ class Serve {
         'contactQuality': contactQuality?.name,
         'power': power?.name,
         'intention': intention?.name,
+        'receptionQuality': receptionQuality?.name,
       };
 
   factory Serve.fromJson(Map<dynamic, dynamic> json) => Serve(
@@ -122,5 +132,6 @@ class Serve {
         contactQuality: ContactQualityX.fromName(json['contactQuality'] as String?),
         power: ServePowerX.fromName(json['power'] as String?),
         intention: ServeIntentionX.fromName(json['intention'] as String?),
+        receptionQuality: ReceptionQualityX.fromName(json['receptionQuality'] as String?),
       );
 }

@@ -1,4 +1,5 @@
 import 'court_zone.dart';
+import 'serve_enums.dart';
 
 enum VarietyLevel { faible, moyenne, elevee }
 
@@ -35,6 +36,10 @@ class ServeAnalysis {
   final int distinctZonesUsed;
   final VarietyLevel varietyLevel;
 
+  /// Mode "avec réception" uniquement : clés = ReceptionQuality.name, décompte
+  /// des services IN pour lesquels la qualité de la réception a été relevée.
+  final Map<String, int> receptionQualityCounts;
+
   const ServeAnalysis({
     required this.total,
     required this.inCount,
@@ -50,6 +55,7 @@ class ServeAnalysis {
     required this.dominantZoneShare,
     required this.distinctZonesUsed,
     required this.varietyLevel,
+    this.receptionQualityCounts = const {},
   });
 
   double get successRatePercent => total == 0 ? 0 : (inCount / total) * 100;
@@ -64,4 +70,19 @@ class ServeAnalysis {
   /// Nombre de services IN dans une zone longue (5, 6, 1).
   int get longServeCount =>
       zoneCounts.entries.where((e) => CourtZones.isLong(e.key)).fold(0, (sum, e) => sum + e.value);
+
+  /// Nombre de services pour lesquels une qualité de réception a été relevée
+  /// (mode avec réception uniquement).
+  int get receptionRecordedCount => receptionQualityCounts.values.fold(0, (a, b) => a + b);
+
+  /// Nombre de services ayant mis l'adversaire en danger : toute réception
+  /// qui ne repart pas proprement vers le poste 3.
+  int get dangerousServeCount => receptionQualityCounts.entries
+      .where((e) => e.key != ReceptionQuality.poste3.name)
+      .fold(0, (sum, e) => sum + e.value);
+
+  /// Part des services (parmi ceux dont la réception a été relevée) ayant
+  /// mis l'adversaire en danger, en pourcentage.
+  double get dangerousServeRate =>
+      receptionRecordedCount == 0 ? 0 : dangerousServeCount / receptionRecordedCount * 100;
 }

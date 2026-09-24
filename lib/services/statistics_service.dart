@@ -41,6 +41,13 @@ class StatisticsService {
       directionCounts[s.direction.name] = (directionCounts[s.direction.name] ?? 0) + 1;
     }
 
+    final receptionQualityCounts = <String, int>{};
+    for (final s in inServes) {
+      final q = s.receptionQuality;
+      if (q == null) continue;
+      receptionQualityCounts[q.name] = (receptionQualityCounts[q.name] ?? 0) + 1;
+    }
+
     String? dominantZone;
     int dominantZoneCount = 0;
     zoneCounts.forEach((zone, count) {
@@ -69,6 +76,7 @@ class StatisticsService {
       dominantZoneShare: dominantZoneShare,
       distinctZonesUsed: distinctZonesUsed,
       varietyLevel: varietyLevel,
+      receptionQualityCounts: receptionQualityCounts,
     );
   }
 

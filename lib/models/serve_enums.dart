@@ -141,6 +141,53 @@ extension ServeIntentionX on ServeIntention {
   }
 }
 
+/// Qualité de la réception adverse après un service IN, uniquement relevée
+/// en "mode avec réception". Seul [poste3] correspond à une réception
+/// maîtrisée (relance propre vers le passeur) : toutes les autres valeurs
+/// traduisent un danger provoqué par le service.
+enum ReceptionQuality { poste3, zone2, zone4, horsCible, ace }
+
+extension ReceptionQualityX on ReceptionQuality {
+  String get label {
+    switch (this) {
+      case ReceptionQuality.poste3:
+        return 'Poste 3 (réception maîtrisée)';
+      case ReceptionQuality.zone2:
+        return 'Déviée en zone 2';
+      case ReceptionQuality.zone4:
+        return 'Déviée en zone 4';
+      case ReceptionQuality.horsCible:
+        return 'Imprécise / ailleurs';
+      case ReceptionQuality.ace:
+        return 'Ace (point direct)';
+    }
+  }
+
+  String get shortLabel {
+    switch (this) {
+      case ReceptionQuality.poste3:
+        return 'Poste 3';
+      case ReceptionQuality.zone2:
+        return 'Zone 2';
+      case ReceptionQuality.zone4:
+        return 'Zone 4';
+      case ReceptionQuality.horsCible:
+        return 'Ailleurs';
+      case ReceptionQuality.ace:
+        return 'Ace';
+    }
+  }
+
+  /// Le service a mis l'adversaire en danger dès que la réception ne repart
+  /// pas proprement vers le poste 3.
+  bool get isDangerous => this != ReceptionQuality.poste3;
+
+  static ReceptionQuality? fromName(String? name) {
+    if (name == null) return null;
+    return ReceptionQuality.values.firstWhereOrNull((e) => e.name == name);
+  }
+}
+
 /// Main dominante de l'élève.
 enum DominantHand { droitier, gaucher }
 

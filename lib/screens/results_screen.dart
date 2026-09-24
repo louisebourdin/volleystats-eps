@@ -102,6 +102,22 @@ class ResultsScreen extends ConsumerWidget {
         const SizedBox(height: 16),
         _TargetZoneCard(session: session),
       ],
+      if (session.mode == SessionMode.avecReception) ...[
+        const SizedBox(height: 16),
+        StatisticCard(
+          title: 'Efficacité au service — danger provoqué',
+          icon: Icons.warning_amber_rounded,
+          subtitle: analysis.receptionRecordedCount == 0
+              ? 'Aucune réception relevée sur cette série.'
+              : '${analysis.dangerousServeCount} / ${analysis.receptionRecordedCount} services ont mis '
+                  'l\'adversaire en danger (${analysis.dangerousServeRate.round()} %).',
+          child: CategoryBarChart(
+            labels: ReceptionQuality.values.map((q) => q.shortLabel).toList(),
+            values: ReceptionQuality.values.map((q) => analysis.receptionQualityCounts[q.name] ?? 0).toList(),
+            color: AppColors.warning,
+          ),
+        ),
+      ],
       const SizedBox(height: 16),
       StatisticCard(
         title: 'Précision — zones visées',
