@@ -6,7 +6,6 @@ import '../providers/session_provider.dart';
 import '../services/demo_data_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/responsive.dart';
-import 'help_screen.dart';
 import 'history_screen.dart';
 import 'new_session_screen.dart';
 import 'results_screen.dart';
@@ -68,12 +67,6 @@ class HomeScreen extends ConsumerWidget {
                     icon: const Icon(Icons.history_rounded),
                     label: const Text('Historique'),
                   ),
-                  const SizedBox(height: 14),
-                  TextButton.icon(
-                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HelpScreen())),
-                    icon: const Icon(Icons.help_outline_rounded),
-                    label: const Text('Comment ça marche ?'),
-                  ),
                   const SizedBox(height: 28),
                   const Divider(),
                   const SizedBox(height: 12),
@@ -92,15 +85,6 @@ class HomeScreen extends ConsumerWidget {
                           ref.read(historyProvider.notifier).addOrUpdate(demo2);
                           ref.read(sessionProvider.notifier).loadCompletedSession(demo2);
                           Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ResultsScreen()));
-                        },
-                      ),
-                      ActionChip(
-                        avatar: const Icon(Icons.school_outlined, size: 18),
-                        label: const Text('Mode professeur'),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Le mode professeur arrivera dans une prochaine version.')),
-                          );
                         },
                       ),
                     ],

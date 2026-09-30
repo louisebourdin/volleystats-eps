@@ -40,10 +40,6 @@ class ServeAnalysis {
   /// des services IN pour lesquels la qualité de la réception a été relevée.
   final Map<String, int> receptionQualityCounts;
 
-  /// Mode "avec réception" uniquement : clés = CourtZones.* (Piscine incluse),
-  /// décompte des services IN pour lesquels la zone de réception a été relevée.
-  final Map<String, int> receptionZoneCounts;
-
   const ServeAnalysis({
     required this.total,
     required this.inCount,
@@ -60,7 +56,6 @@ class ServeAnalysis {
     required this.distinctZonesUsed,
     required this.varietyLevel,
     this.receptionQualityCounts = const {},
-    this.receptionZoneCounts = const {},
   });
 
   double get successRatePercent => total == 0 ? 0 : (inCount / total) * 100;
@@ -90,8 +85,4 @@ class ServeAnalysis {
   /// mis l'adversaire en danger, en pourcentage.
   double get dangerousServeRate =>
       receptionRecordedCount == 0 ? 0 : dangerousServeCount / receptionRecordedCount * 100;
-
-  /// Zones de réception relevées, dans l'ordre d'affichage standard.
-  List<MapEntry<String, int>> get receptionZoneCountsOrdered =>
-      CourtZones.orderedForStats.map((z) => MapEntry(z, receptionZoneCounts[z] ?? 0)).toList();
 }

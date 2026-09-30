@@ -42,15 +42,10 @@ class StatisticsService {
     }
 
     final receptionQualityCounts = <String, int>{};
-    final receptionZoneCounts = <String, int>{};
     for (final s in inServes) {
       final q = s.receptionQuality;
       if (q != null) {
         receptionQualityCounts[q.name] = (receptionQualityCounts[q.name] ?? 0) + 1;
-      }
-      final rz = s.receptionZone;
-      if (rz != null) {
-        receptionZoneCounts[rz] = (receptionZoneCounts[rz] ?? 0) + 1;
       }
     }
 
@@ -83,7 +78,6 @@ class StatisticsService {
       distinctZonesUsed: distinctZonesUsed,
       varietyLevel: varietyLevel,
       receptionQualityCounts: receptionQualityCounts,
-      receptionZoneCounts: receptionZoneCounts,
     );
   }
 

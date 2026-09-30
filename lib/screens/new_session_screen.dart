@@ -23,8 +23,6 @@ class NewSessionScreen extends ConsumerStatefulWidget {
 class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
   final _nameController = TextEditingController();
   String? _className;
-  DominantHand _hand = DominantHand.droitier;
-  String _mainServeTypeId = ServeTypes.tennis.id;
   final Set<String> _targetZones = {};
   SessionMode _mode = SessionMode.sansReception;
   final Set<String> _receptionZones = {};
@@ -49,8 +47,8 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
     final student = Student(
       name: _nameController.text.trim(),
       className: _className!,
-      dominantHand: _hand,
-      mainServeTypeId: _mainServeTypeId,
+      dominantHand: DominantHand.droitier,
+      mainServeTypeId: ServeTypes.tennis.id,
     );
     ref.read(sessionProvider.notifier).startSession(
           student,
@@ -113,35 +111,7 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
                   onChanged: (value) => setState(() => _className = value),
                 ),
                 const SizedBox(height: 24),
-                const Text('Main dominante', style: TextStyle(fontWeight: FontWeight.w700)),
-                const SizedBox(height: 8),
-                SegmentedButton<DominantHand>(
-                  segments: const [
-                    ButtonSegment(value: DominantHand.droitier, label: Text('Droitier'), icon: Icon(Icons.back_hand_outlined)),
-                    ButtonSegment(value: DominantHand.gaucher, label: Text('Gaucher'), icon: Icon(Icons.front_hand_outlined)),
-                  ],
-                  selected: {_hand},
-                  onSelectionChanged: (s) => setState(() => _hand = s.first),
-                ),
-                const SizedBox(height: 24),
-                const Text('Type de service principal', style: TextStyle(fontWeight: FontWeight.w700)),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: ServeTypes.all
-                      .map(
-                        (t) => ChoiceChip(
-                          label: Text(t.label),
-                          avatar: Icon(t.icon, size: 18),
-                          selected: _mainServeTypeId == t.id,
-                          onSelected: (_) => setState(() => _mainServeTypeId = t.id),
-                        ),
-                      )
-                      .toList(),
-                ),
-                const SizedBox(height: 24),
-                const Text('Zone(s) à travailler (facultatif)', style: TextStyle(fontWeight: FontWeight.w700)),
+                const Text('Zone(s) à travailler', style: TextStyle(fontWeight: FontWeight.w700)),
                 const SizedBox(height: 4),
                 const Text(
                   'Touche une ou plusieurs zones du terrain pour que l\'élève s\'entraîne à viser précisément '

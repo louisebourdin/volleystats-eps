@@ -313,8 +313,7 @@ class _ConfirmationView extends StatelessWidget {
                       '${ServeTypes.byId(serve.serveTypeId).label} · ${serve.trajectory.shortLabel}'
                       '${serve.tossQuality != null ? ' · ${serve.tossQuality!.label}' : ''}'
                       '${serve.zone != null && CourtZones.depthLabel(serve.zone!) != null ? ' · ${CourtZones.depthLabel(serve.zone!)}' : ''}'
-                      '${serve.receptionZone != null ? ' · Réception : ${CourtZones.label(serve.receptionZone!)}' : ''}'
-                      '${serve.receptionQuality != null ? ' (${serve.receptionQuality!.shortLabel})' : ''}'
+                      '${serve.receptionQuality != null ? ' · ${serve.receptionQuality!.shortLabel}' : ''}'
                       '${serve.footFault ? ' · Ligne mordue' : ''}',
                       style: const TextStyle(color: AppColors.textSecondary),
                     ),

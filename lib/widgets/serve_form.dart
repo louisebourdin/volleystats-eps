@@ -110,22 +110,6 @@ class ServeForm extends ConsumerWidget {
         ),
         if (mode == SessionMode.avecReception && draft.result == ServeResult.inCourt) ...[
           const SizedBox(height: 20),
-          const _SectionLabel('Zone d\'arrivée de la réception'),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: CourtZones.orderedForStats
-                .map(
-                  (z) => ChoiceChip(
-                    label: Text(CourtZones.label(z)),
-                    selected: draft.receptionZone == z,
-                    onSelected: (_) => notifier.updateDraft((d) => d.copyWith(receptionZone: z)),
-                  ),
-                )
-                .toList(),
-          ),
-          const SizedBox(height: 20),
           const _SectionLabel('Réception adverse'),
           const SizedBox(height: 4),
           const Text(

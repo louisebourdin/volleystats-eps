@@ -23,10 +23,8 @@ class Serve {
   /// Défaut de placement du lancer de balle, s'il y en a un (facultatif).
   final TossQuality? tossQuality;
 
-  /// Zone (CourtZones.*, Piscine incluse) où atterrit la réception adverse,
-  /// et qualité de cette réception (mode avec réception uniquement, et
+  /// Qualité de la réception adverse (mode avec réception uniquement, et
   /// seulement pour les services IN).
-  final String? receptionZone;
   final ReceptionQuality? receptionQuality;
 
   const Serve({
@@ -43,7 +41,6 @@ class Serve {
     required this.trajectory,
     required this.direction,
     this.tossQuality,
-    this.receptionZone,
     this.receptionQuality,
   });
 
@@ -63,7 +60,6 @@ class Serve {
     ServeTrajectory? trajectory,
     ServeDirection? direction,
     Object? tossQuality = _sentinel,
-    Object? receptionZone = _sentinel,
     Object? receptionQuality = _sentinel,
   }) {
     return Serve(
@@ -80,7 +76,6 @@ class Serve {
       trajectory: trajectory ?? this.trajectory,
       direction: direction ?? this.direction,
       tossQuality: identical(tossQuality, _sentinel) ? this.tossQuality : tossQuality as TossQuality?,
-      receptionZone: identical(receptionZone, _sentinel) ? this.receptionZone : receptionZone as String?,
       receptionQuality: identical(receptionQuality, _sentinel)
           ? this.receptionQuality
           : receptionQuality as ReceptionQuality?,
@@ -101,7 +96,6 @@ class Serve {
         'trajectory': trajectory.name,
         'direction': direction.name,
         'tossQuality': tossQuality?.name,
-        'receptionZone': receptionZone,
         'receptionQuality': receptionQuality?.name,
       };
 
@@ -119,7 +113,6 @@ class Serve {
         trajectory: ServeTrajectoryX.fromName(json['trajectory'] as String? ?? 'cloche'),
         direction: ServeDirectionX.fromName(json['direction'] as String? ?? 'centre'),
         tossQuality: TossQualityX.fromName(json['tossQuality'] as String?),
-        receptionZone: json['receptionZone'] as String?,
         receptionQuality: ReceptionQualityX.fromName(json['receptionQuality'] as String?),
       );
 }

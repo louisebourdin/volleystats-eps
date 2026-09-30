@@ -20,7 +20,6 @@ class CsvExportService {
     'Trajectoire',
     'Ligne de fond mordue',
     'Qualite du lancer',
-    'Zone de reception',
     'Qualite de la reception',
   ];
 
@@ -42,7 +41,6 @@ class CsvExportService {
         s.trajectory.shortLabel,
         s.footFault ? 'Oui' : 'Non',
         s.tossQuality?.label ?? '',
-        s.receptionZone != null ? CourtZones.label(s.receptionZone!) : '',
         s.receptionQuality?.label ?? '',
       ];
       buffer.writeln(row.map(_escape).join(';'));

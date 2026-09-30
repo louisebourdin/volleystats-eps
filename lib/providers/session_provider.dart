@@ -110,7 +110,6 @@ class SessionNotifier extends StateNotifier<SessionState> {
       trajectory: draft.trajectory,
       direction: draft.direction ?? ServeDirection.centre,
       tossQuality: draft.tossQuality,
-      receptionZone: draft.receptionZone,
       receptionQuality: draft.receptionQuality,
     );
 
@@ -149,7 +148,6 @@ class SessionNotifier extends StateNotifier<SessionState> {
         trajectory: last.trajectory,
         direction: last.direction,
         tossQuality: last.tossQuality,
-        receptionZone: last.receptionZone,
         receptionQuality: last.receptionQuality,
       ),
     );

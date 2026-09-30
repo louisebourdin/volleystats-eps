@@ -49,12 +49,14 @@ extension ServeDirectionX on ServeDirection {
       ServeDirection.values.firstWhere((e) => e.name == name, orElse: () => ServeDirection.centre);
 }
 
-/// Qualité du lancer de balle : défaut de placement du lancer, s'il y en a un.
-enum TossQuality { tropBas, tropDevant, tropDerriere, tropDroite, tropGauche }
+/// Qualité du lancer de balle : bon, ou défaut de placement du lancer.
+enum TossQuality { bon, tropBas, tropDevant, tropDerriere, tropDroite, tropGauche }
 
 extension TossQualityX on TossQuality {
   String get label {
     switch (this) {
+      case TossQuality.bon:
+        return 'Bon';
       case TossQuality.tropBas:
         return 'Trop bas';
       case TossQuality.tropDevant:
