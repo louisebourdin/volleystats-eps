@@ -26,7 +26,9 @@ alias public : https://moonlit-youtiao-44fcd5.netlify.app) en déploiement conti
 - Netlify n'a pas Flutter préinstallé : la commande de build (configurée dans les
   paramètres du site Netlify, onglet "Build & deploy") clone le SDK Flutter stable à
   chaque build avant de lancer `flutter build web`. C'est normal si un déploiement
-  prend 2 à 4 minutes.
+  prend 2 à 4 minutes. La commande nettoie d'abord le dossier `_flutter_sdk` avant de
+  cloner (`rm -rf _flutter_sdk && git clone ...`) pour éviter un échec si un build
+  précédent a été interrompu en cours de clonage.
 - Pour vérifier qu'un déploiement a réussi : dashboard Netlify du projet → onglet
   "Deploys" → dernier déploiement → logs.
 
@@ -36,15 +38,35 @@ depuis un autre appareil) :
 1. `git clone https://github.com/louisebourdin/volleystats-eps.git`
 2. Faire les modifications, tester localement (`flutter analyze`, `flutter test`,
    `flutter run -d chrome`)
-3. `git add -A && git commit -m "..." && git push`
-4. Le site public se met à jour tout seul en 1-4 minutes.
+3. `git add -A && git commit -m "..." && git push` sur une branche `claude/...`
+4. `.github/workflows/open-pr-claude.yml` ouvre automatiquement une Pull Request vers
+   `main` dès que cette branche est poussée sur GitHub — il suffit de cliquer
+   "Merge" pour publier.
+5. Le site public se met à jour tout seul en 1-4 minutes après le merge sur `main`.
 
 ## Utilisation rapide
 
-Depuis l'accueil : **Nouvelle série** → renseigner l'élève → toucher le terrain après
-chaque service → **Enregistrer le service** → bilan automatique après le 10e service.
-Le bouton **Charger une démonstration** remplit deux séries fictives (élève "Alex") pour
-présenter l'application sans taper 10 services réels.
+Depuis l'accueil : **Nouvelle série** → renseigner l'élève → choisir le **mode
+d'analyse** (voir ci-dessous) → toucher le terrain après chaque service → bilan
+automatique après le 10e service. Le bouton **Charger une démonstration** remplit deux
+séries fictives (élève "Alex") pour présenter l'application sans taper 10 services réels.
+
+### Deux modes d'analyse
+
+- **Sans réception** (par défaut) : analyse classique du service seul (résultat, zone,
+  régularité, précision, variété).
+- **Avec réception** : en plus, pour chaque service réussi, on note où repart la
+  réception adverse (zone d'arrivée + "Bonne réception" si la balle repart haute vers
+  le milieu de terrain, ou "Ace" si le point est direct ou la réception ratée). Le
+  bilan affiche alors un taux de **"danger provoqué"** au service. On peut aussi
+  indiquer (facultatif, informatif) les postes occupés par les réceptionneurs.
+
+### Zone(s) à travailler
+
+À la création d'une série, on peut choisir une ou plusieurs zones à viser (Piscine
+comprise). Pendant la saisie, un service qui atterrit dans le terrain mais hors de ces
+zones choisies s'affiche en rouge (comme un service raté), en aide visuelle immédiate —
+sans jamais changer le résultat réellement enregistré dans les statistiques.
 
 ## Architecture
 
@@ -52,8 +74,20 @@ présenter l'application sans taper 10 services réels.
 lib/
   main.dart                 point d'entrée, initialise Hive puis Riverpod
   theme/                     couleurs et thème Material 3
-  models/                    Student, Session, Serve, ServeDraft, ServeAnalysis, Recommendation
-  services/                  StorageService (Hive), StatisticsService, RecommendationEngine, DemoDataService
+  models/
+    student.dart             Student
+    session.dart              Session, SessionMode (sans/avec réception)
+    serve.dart, serve_draft.dart   Serve (enregistré), ServeDraft (en cours de saisie)
+    serve_enums.dart          ServeResult, ServeTrajectory, TossQuality, ReceptionQuality...
+    court_zone.dart           CourtZones (1-6 + Piscine), classification courts/longs
+    serve_analysis.dart, recommendation.dart
+  services/
+    storage_service.dart      persistance locale (Hive)
+    statistics_service.dart   calcul du bilan à partir des Serve bruts
+    recommendation_engine.dart moteur de conseils à règles
+    demo_data_service.dart    séries fictives pour la démonstration
+    csv_export_service.dart   génère le contenu CSV d'une série
+    csv_downloader/            téléchargement du CSV (implémentation par plateforme)
   providers/                 sessionProvider (série en cours), historyProvider (séries sauvegardées)
   screens/                   home, new_session, serve, results, history, help
   widgets/
@@ -69,26 +103,39 @@ lib/
 - **Stockage** : Hive en local (`StorageService`), avec des modèles qui se sérialisent
   eux-mêmes en `Map` (`toJson`/`fromJson`). Remplacer `StorageService` par une
   implémentation Firebase/Supabase/API ne demande de toucher qu'à ce seul fichier — les
-  écrans et providers n'en dépendent qu'à travers son interface.
+  écrans et providers n'en dépendent qu'à travers son interface. Les données restent
+  **uniquement sur l'appareil/navigateur** où la série a été saisie (pas de compte, pas
+  de synchronisation entre appareils).
 - **Terrain interactif** : `CourtGeometry` définit une seule fois la géométrie des zones
   (fractions 0..1 de la largeur/hauteur), utilisée à la fois par le `CustomPainter` et par
   le détecteur de gestes. Les impacts sont stockés en coordonnées normalisées : la carte
-  reste juste quelle que soit la taille d'écran.
+  reste juste quelle que soit la taille d'écran. La Piscine se sélectionne comme les 6
+  autres zones partout où on choisit des zones au tactile.
+- **Export CSV** : `CsvExportService` génère le contenu (séparateur `;`, BOM UTF-8 pour
+  Excel FR) indépendamment de la plateforme ; `csv_downloader/` choisit l'implémentation
+  au moment de la compilation (import conditionnel `dart:html` sur le web pour déclencher
+  un téléchargement navigateur, `dart:io` + `path_provider` sur mobile/desktop pour
+  enregistrer le fichier), sans dépendance tierce ajoutée.
 - **Responsive** : `ResponsiveBuilder` (breakpoints mobile / tablette / desktop) bascule
   entre mise en page verticale (terrain puis formulaire) et mise en page à deux colonnes
   (terrain à gauche, formulaire à droite ; côté résultats, statistiques à gauche et carte
   d'impacts à droite).
 
-## Ce qui est déjà fait (MVP, §33 du cahier des charges)
+## Ce qui est déjà fait (MVP + évolutions)
 
-Accueil, création de série, terrain interactif (zones 1-6 + Piscine + OUT + FILET),
-saisie des 10 services (résultat, zone, ligne mordue, type de service, trajectoire,
-caractéristiques facultatives), bilan (régularité, précision, variété, trajectoire, carte
-des 10 impacts), moteur de conseils à règles, comparaison automatique avec la série
-précédente du même élève, historique local, mode démonstration, responsive mobile /
-tablette / desktop / web.
+Accueil, création de série (élève, mode d'analyse, zone(s) à travailler, réceptionneurs),
+terrain interactif (zones 1-6 + Piscine + OUT + FILET, Piscine sélectionnable partout),
+saisie des 10 services (ligne de fond mordue, type de service, trajectoire "Tendu"/
+"Cloche", qualité du lancer de balle, zone/qualité de réception en mode avec réception),
+alerte visuelle rouge si un service tombe hors de la zone visée, bilan (régularité,
+précision dont services courts 2-3-4 vs longs 5-6-1, variété, trajectoire, efficacité au
+service en mode avec réception, carte des 10 impacts), moteur de conseils à règles,
+comparaison automatique avec la série précédente du même élève, export CSV d'une série,
+historique local (avec repérage des séries "avec réception"), mode démonstration,
+responsive mobile / tablette / desktop / web, publication continue via Netlify + Pull
+Request automatique pour chaque branche de travail.
 
-## Prochaines étapes (non incluses dans ce premier lot)
+## Prochaines étapes (non incluses dans ce lot)
 
 - **Mode professeur** : vue d'ensemble multi-élèves/multi-classes (bouton déjà présent à
   l'accueil, affiche pour l'instant un message "bientôt disponible").
@@ -96,8 +143,8 @@ tablette / desktop / web.
   le bilan), mais un écran dédié pour comparer deux séries côte à côte reste à faire.
 - **Synchronisation cloud** (Firebase/Supabase/API) : l'architecture (`StorageService`,
   modèles `toJson`/`fromJson`) est prête pour ça, l'implémentation reste à brancher.
-- **PWA avancée** : `web/manifest.json` par défaut de Flutter est fonctionnel ; icônes
-  dédiées, mode hors-ligne (service worker personnalisé) restent à affiner.
+- **PWA avancée** : `web/manifest.json` par défaut de Flutter est fonctionnel ; mode
+  hors-ligne (service worker personnalisé) reste à affiner.
 - Renommer l'application : changer `VolleyStats EPS` dans `lib/main.dart` et
   `lib/screens/home_screen.dart` (le nom du package `volleystats_eps` dans `pubspec.yaml`
   peut rester tel quel, ou être changé avec l'outil `rename` si besoin d'un vrai rebrand).
