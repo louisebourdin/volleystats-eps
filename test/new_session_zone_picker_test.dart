@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:volleystats_eps/providers/history_provider.dart';
 import 'package:volleystats_eps/screens/new_session_screen.dart';
 import 'package:volleystats_eps/theme/app_theme.dart';
 import 'package:volleystats_eps/widgets/court/volley_court_widget.dart';
@@ -15,10 +16,12 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    // NewSessionScreen ne dépend que de sessionProvider (en mémoire) : pas
-    // besoin d'initialiser Hive/StorageService pour ce test.
+    // NewSessionScreen ne dépend que de sessionProvider (en mémoire) et de la
+    // dernière classe choisie (surchargée ici) : pas besoin d'initialiser
+    // Hive/StorageService pour ce test.
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [currentClassProvider.overrideWith((ref) => null)],
         child: MaterialApp(theme: AppTheme.light(), home: const NewSessionScreen()),
       ),
     );

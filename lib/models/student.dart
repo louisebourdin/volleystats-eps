@@ -1,5 +1,8 @@
 import 'serve_enums.dart';
 
+/// Classes proposées dans l'appli. Chacune a son propre historique partagé.
+const List<String> kSchoolClasses = ['2e1', '2e2', '2e3', '2e4', '2e5'];
+
 class Student {
   final String name; // prénom ou pseudonyme
   final String className;

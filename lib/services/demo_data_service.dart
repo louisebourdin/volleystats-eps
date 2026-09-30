@@ -9,6 +9,11 @@ import '../widgets/court/court_geometry.dart';
 /// Séries fictives pour la démonstration (§30-31) : permet de présenter
 /// l'application sans devoir réaliser dix services réels.
 class DemoDataService {
+  /// Les séries de démo restent sur l'appareil : jamais envoyées à Supabase.
+  static const String demoIdPrefix = 'demo-';
+
+  static bool isDemo(Session session) => session.id.startsWith(demoIdPrefix);
+
   static (double, double) _pointForZone(String zoneId) {
     final r = CourtGeometry.rectForZone(zoneId);
     return (r.center.dx, r.center.dy);
@@ -52,7 +57,7 @@ class DemoDataService {
 
   /// Série de démonstration principale — reproduit l'exemple du §30 (Alex).
   static Session buildDemoSession({DateTime? date}) {
-    final sessionId = newId();
+    final sessionId = '$demoIdPrefix${newId()}';
     final results = <Map<String, dynamic>>[
       {'r': ServeResult.inCourt, 'z': CourtZones.zone5, 't': 'tennis'},
       {'r': ServeResult.inCourt, 'z': CourtZones.zone5, 't': 'tennis'},
@@ -96,7 +101,7 @@ class DemoDataService {
   /// Deuxième série du même élève, plus variée, pour illustrer la
   /// comparaison de progression (§19) dans l'historique.
   static Session buildDemoSessionImproved({DateTime? date}) {
-    final sessionId = newId();
+    final sessionId = '$demoIdPrefix${newId()}';
     final results = <Map<String, dynamic>>[
       {'r': ServeResult.inCourt, 'z': CourtZones.zone5, 't': 'tennis'},
       {'r': ServeResult.inCourt, 'z': CourtZones.zone1, 't': 'tennis'},
