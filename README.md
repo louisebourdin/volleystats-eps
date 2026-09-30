@@ -44,6 +44,33 @@ depuis un autre appareil) :
    "Merge" pour publier.
 5. Le site public se met à jour tout seul en 1-4 minutes après le merge sur `main`.
 
+## Historique partagé par classe (Supabase)
+
+La classe se choisit dans un menu déroulant (2e1 à 2e5, liste `kSchoolClasses` dans
+`lib/models/student.dart`). Chaque série terminée est envoyée dans une base Supabase ;
+l'écran Historique affiche toutes les séries de la classe choisie, quel que soit
+l'appareil qui les a enregistrées. Hors ligne, les séries restent sur l'appareil (Hive)
+et partent à la prochaine synchronisation. Les séries de démonstration ne sont jamais
+envoyées.
+
+Projet Supabase actuel (déjà configuré dans `lib/config/supabase_config.dart`) :
+
+| | |
+|---|---|
+| Organisation / projet | `VolleyStats EPS` / `volleystats-eps` (plan gratuit, compte GitHub louisebourdin) |
+| Dashboard | https://supabase.com/dashboard/project/ugduqwhfabtmmhnbvcdx |
+| URL de l'API | https://ugduqwhfabtmmhnbvcdx.supabase.co |
+| Clé publishable (publique) | `sb_publishable_aaVJ2LPwXJZ0kKytEgaPJg_UCYK5Tim` |
+
+La clé publishable peut être publique : la table `sessions` est fermée à l'accès direct,
+tout passe par les fonctions de `supabase/schema.sql`. **Ne jamais committer** la clé
+`sb_secret_…`/`service_role` ni le mot de passe Postgres : ils donnent un accès
+administrateur complet à la base.
+
+Pour repartir d'un nouveau projet : SQL Editor → coller `supabase/schema.sql` → Run, puis
+mettre la nouvelle URL et la clé publishable dans `lib/config/supabase_config.dart` (ou au
+build : `--dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`).
+
 ## Utilisation rapide
 
 Depuis l'accueil : **Nouvelle série** → renseigner l'élève → choisir le **mode
@@ -141,8 +168,6 @@ Request automatique pour chaque branche de travail.
   l'accueil, affiche pour l'instant un message "bientôt disponible").
 - **Écran de comparaison dédié** : la comparaison existe déjà (badges +X % / +Y zones sur
   le bilan), mais un écran dédié pour comparer deux séries côte à côte reste à faire.
-- **Synchronisation cloud** (Firebase/Supabase/API) : l'architecture (`StorageService`,
-  modèles `toJson`/`fromJson`) est prête pour ça, l'implémentation reste à brancher.
 - **PWA avancée** : `web/manifest.json` par défaut de Flutter est fonctionnel ; mode
   hors-ligne (service worker personnalisé) reste à affiner.
 - Renommer l'application : changer `VolleyStats EPS` dans `lib/main.dart` et

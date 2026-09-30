@@ -5,6 +5,7 @@ import '../models/court_zone.dart';
 import '../models/serve_enums.dart';
 import '../models/session.dart';
 import '../models/student.dart';
+import '../providers/history_provider.dart';
 import '../providers/session_provider.dart';
 import '../theme/app_colors.dart';
 import '../utils/french_date.dart';
@@ -21,7 +22,7 @@ class NewSessionScreen extends ConsumerStatefulWidget {
 
 class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
   final _nameController = TextEditingController();
-  final _classController = TextEditingController();
+  String? _className;
   DominantHand _hand = DominantHand.droitier;
   String _mainServeTypeId = ServeTypes.tennis.id;
   final Set<String> _targetZones = {};
@@ -29,18 +30,25 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
   final Set<String> _receptionZones = {};
 
   @override
+  void initState() {
+    super.initState();
+    // Pré-remplit avec la dernière classe choisie sur cet appareil.
+    final lastClass = ref.read(currentClassProvider);
+    if (kSchoolClasses.contains(lastClass)) _className = lastClass;
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
-    _classController.dispose();
     super.dispose();
   }
 
-  bool get _canStart => _nameController.text.trim().isNotEmpty;
+  bool get _canStart => _nameController.text.trim().isNotEmpty && _className != null;
 
   void _start() {
     final student = Student(
       name: _nameController.text.trim(),
-      className: _classController.text.trim(),
+      className: _className!,
       dominantHand: _hand,
       mainServeTypeId: _mainServeTypeId,
     );
@@ -98,9 +106,11 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
                   onChanged: (_) => setState(() {}),
                 ),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: _classController,
+                DropdownButtonFormField<String>(
+                  initialValue: _className,
                   decoration: const InputDecoration(labelText: 'Classe', prefixIcon: Icon(Icons.groups_outlined)),
+                  items: [for (final c in kSchoolClasses) DropdownMenuItem(value: c, child: Text(c))],
+                  onChanged: (value) => setState(() => _className = value),
                 ),
                 const SizedBox(height: 24),
                 const Text('Main dominante', style: TextStyle(fontWeight: FontWeight.w700)),
