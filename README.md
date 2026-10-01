@@ -32,6 +32,9 @@ production de ce compte faute de crédits, voir plus bas) :
   - Commande de build : `bash scripts/build_web.sh`
   - Répertoire de sortie : `build/web`
   - Branche de production : `main`
+- `wrangler.jsonc` (à la racine du dépôt) indique à `wrangler deploy` de servir le
+  contenu de `build/web` comme site statique — sans ce fichier, le déploiement
+  "réussit" mais la page est blanche (rien à servir).
 - Pour vérifier qu'un déploiement a réussi : dashboard Cloudflare → Workers & Pages →
   le projet → onglet "Deployments" → dernier déploiement → logs.
 

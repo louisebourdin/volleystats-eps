@@ -1,0 +1,10 @@
+{
+  // Configuration Cloudflare Workers/Pages : sert le site statique buildé par
+  // scripts/build_web.sh (voir README > Déploiement) comme assets statiques.
+  "name": "volleystats-eps",
+  "compatibility_date": "2026-01-01",
+  "assets": {
+    "directory": "build/web",
+    "not_found_handling": "single-page-application"
+  }
+}
