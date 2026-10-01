@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/court_zone.dart';
 import '../../models/serve_enums.dart';
 import 'court_geometry.dart';
 import 'court_marker.dart';
@@ -27,6 +28,11 @@ class VolleyCourtWidget extends StatelessWidget {
   final bool zonePickerMode;
   final ValueChanged<String>? onZoneToggle;
 
+  /// En mode sélection, ignore les taps sur la Piscine : utile quand la
+  /// sélection représente des postes de joueurs réels (1 à 6), comme les
+  /// réceptionneurs, pour qui "Piscine" n'a pas de sens.
+  final bool excludePiscineFromPicker;
+
   const VolleyCourtWidget({
     super.key,
     this.markers = const [],
@@ -35,6 +41,7 @@ class VolleyCourtWidget extends StatelessWidget {
     this.targetZones = const {},
     this.zonePickerMode = false,
     this.onZoneToggle,
+    this.excludePiscineFromPicker = false,
   });
 
   @override
@@ -51,7 +58,9 @@ class VolleyCourtWidget extends StatelessWidget {
               final x = (local.dx / size.width).clamp(0.0, 1.0);
               final y = (local.dy / size.height).clamp(0.0, 1.0);
               final result = CourtGeometry.resultForPoint(Offset(x, y));
-              if (result.result == ServeResult.inCourt && result.zone != null) {
+              if (result.result == ServeResult.inCourt &&
+                  result.zone != null &&
+                  !(excludePiscineFromPicker && result.zone == CourtZones.piscine)) {
                 onZoneToggle!(result.zone!);
               }
             };

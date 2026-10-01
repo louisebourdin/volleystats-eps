@@ -190,6 +190,7 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
                       zonePickerMode: true,
                       targetZones: _receptionZones,
                       onZoneToggle: _toggleReceptionZone,
+                      excludePiscineFromPicker: true,
                     ),
                   ),
                   const SizedBox(height: 8),
