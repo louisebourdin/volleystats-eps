@@ -328,10 +328,11 @@ class _StudentReflectionState extends State<_StudentReflection> {
         ),
         const SizedBox(height: 14),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (_index > 0)
-              OutlinedButton(onPressed: () => setState(() => _index--), child: const Text('Précédent')),
-            const Spacer(),
+            _index > 0
+                ? OutlinedButton(onPressed: () => setState(() => _index--), child: const Text('Précédent'))
+                : const SizedBox.shrink(),
             ElevatedButton(
               onPressed: () => setState(() => _index++),
               child: Text(_index == _questions.length - 1 ? 'Voir l\'avis de l\'appli' : 'Suivant'),
