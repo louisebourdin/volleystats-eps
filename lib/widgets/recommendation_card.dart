@@ -43,24 +43,6 @@ class RecommendationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(recommendation.explanation, style: const TextStyle(color: AppColors.textSecondary, height: 1.35)),
-                    if (recommendation.exercises.isNotEmpty) ...[
-                      const SizedBox(height: 14),
-                      const Text('Exercices proposés', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                      const SizedBox(height: 8),
-                      ...recommendation.exercises.map(
-                        (e) => Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.fitness_center_rounded, size: 16, color: color),
-                              const SizedBox(width: 8),
-                              Expanded(child: Text(e)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),

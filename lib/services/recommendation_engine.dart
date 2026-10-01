@@ -33,12 +33,6 @@ class RecommendationEngine {
         explanation:
             'Une grande partie de tes services termine hors du terrain. Avant de chercher la puissance ou les '
             'zones difficiles, travaille la répétition du geste.',
-        exercises: [
-          'Répétition du geste sans ballon',
-          'Services à faible puissance',
-          'Services à courte distance',
-          'Séries de 10 services en visant simplement l\'intérieur du terrain',
-        ],
         level: RecommendationLevel.priority,
         icon: Icons.gps_fixed_rounded,
       );
@@ -62,12 +56,6 @@ class RecommendationEngine {
         explanation:
             'Tes services sont réguliers, mais la plupart atterrissent en $zoneLabel. Apprendre à varier tes '
             'zones rendra ton service beaucoup plus difficile à réceptionner.',
-        exercises: const [
-          'Viser alternativement zone 1 et zone 5',
-          'Viser gauche / droite',
-          'Placer des cibles au sol',
-          'Réaliser 3 services dans trois zones différentes',
-        ],
         level: RecommendationLevel.good,
         icon: Icons.shuffle_rounded,
       );
@@ -79,12 +67,6 @@ class RecommendationEngine {
         title: 'Service régulier et varié',
         explanation: 'Bravo, ton service est fiable et bien réparti sur le terrain. Le nouvel objectif : progresser '
             'en puissance et en difficulté pour l\'adversaire.',
-        exercises: [
-          'Augmenter progressivement la vitesse',
-          'Viser les espaces libres',
-          'Travailler les zones difficiles',
-          'Varier entre service flottant et service puissant',
-        ],
         level: RecommendationLevel.good,
         icon: Icons.emoji_events_outlined,
       );
@@ -96,12 +78,6 @@ class RecommendationEngine {
         title: 'Priorité : sécuriser ton service',
         explanation: 'Un peu plus de la moitié de tes services ne passent pas. Concentre-toi sur un geste simple '
             'et répétable avant de viser des zones précises.',
-        exercises: [
-          'Services à faible puissance en visant le centre du terrain',
-          'Travail face à un mur',
-          'Répétition du lancer de balle seul',
-          'Séries courtes de 5 services en visant uniquement "dedans"',
-        ],
         level: RecommendationLevel.priority,
         icon: Icons.restart_alt_rounded,
       );
@@ -111,11 +87,6 @@ class RecommendationEngine {
       title: 'Bonne base, continue à consolider',
       explanation: 'Ta série est correcte. Continue à répéter le geste pour gagner en régularité, puis travaille '
           'progressivement la précision des zones.',
-      exercises: [
-        'Séries de 10 services en visant l\'intérieur du terrain',
-        'Viser alternativement 2 zones',
-        'Travailler le contact avec le ballon',
-      ],
       level: RecommendationLevel.info,
       icon: Icons.trending_up_rounded,
     );
@@ -124,11 +95,6 @@ class RecommendationEngine {
   static const _footFaultRec = Recommendation(
     title: 'Attention à ta position de départ',
     explanation: 'Plusieurs services montrent une ligne de fond mordue (faute de pied).',
-    exercises: [
-      'Commencer légèrement plus loin derrière la ligne',
-      'Stabiliser les appuis avant l\'armer du bras',
-      'Travailler le geste sans chercher immédiatement la puissance',
-    ],
     level: RecommendationLevel.priority,
     icon: Icons.warning_amber_rounded,
   );
@@ -136,12 +102,6 @@ class RecommendationEngine {
   static const _netRec = Recommendation(
     title: 'Travaille la hauteur et le contact avec le ballon',
     explanation: 'Plusieurs services terminent dans le filet.',
-    exercises: [
-      'Vérifier le lancer de balle',
-      'Contacter le ballon devant soi',
-      'Terminer le geste vers la cible',
-      'Réduire temporairement la puissance',
-    ],
     level: RecommendationLevel.priority,
     icon: Icons.sports_volleyball_outlined,
   );

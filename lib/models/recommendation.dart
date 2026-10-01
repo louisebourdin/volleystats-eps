@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 
 enum RecommendationLevel { priority, good, info }
 
-/// Un conseil généré par le moteur de recommandations, avec ses exercices.
+/// Un axe prioritaire généré par le moteur de recommandations. Les exercices
+/// concrets restent du ressort de l'enseignant : l'appli ne fait que pointer
+/// la priorité, pas la marche à suivre.
 class Recommendation {
   final String title;
   final String explanation;
-  final List<String> exercises;
   final RecommendationLevel level;
   final IconData icon;
 
   const Recommendation({
     required this.title,
     required this.explanation,
-    required this.exercises,
     required this.level,
     this.icon = Icons.tips_and_updates_outlined,
   });

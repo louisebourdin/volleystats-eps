@@ -116,11 +116,10 @@ lib/
     csv_export_service.dart   génère le contenu CSV d'une série
     csv_downloader/            téléchargement du CSV (implémentation par plateforme)
   providers/                 sessionProvider (série en cours), historyProvider (séries sauvegardées)
-  screens/                   home, new_session, serve, results, history, help
+  screens/                   home, new_session, serve, results, history
   widgets/
     court/                   terrain interactif (CustomPainter + GestureDetector), géométrie partagée
     serve_form.dart          formulaire rapide d'un service
-    result_charts.dart       graphiques (fl_chart)
     statistic_card.dart, recommendation_card.dart, serve_progress_indicator.dart, confirm_dialog.dart
   utils/                     responsive breakpoints, génération d'id, formatage de date FR
 ```
@@ -128,11 +127,9 @@ lib/
 - **State management** : Riverpod (`StateNotifierProvider`). La série en cours reste
   disponible pendant toute la navigation tant qu'elle n'est pas explicitement quittée.
 - **Stockage** : Hive en local (`StorageService`), avec des modèles qui se sérialisent
-  eux-mêmes en `Map` (`toJson`/`fromJson`). Remplacer `StorageService` par une
-  implémentation Firebase/Supabase/API ne demande de toucher qu'à ce seul fichier — les
-  écrans et providers n'en dépendent qu'à travers son interface. Les données restent
-  **uniquement sur l'appareil/navigateur** où la série a été saisie (pas de compte, pas
-  de synchronisation entre appareils).
+  eux-mêmes en `Map` (`toJson`/`fromJson`). Les données restent sur l'appareil/navigateur
+  par défaut (pas de compte) ; en choisissant une classe, l'historique de cette classe est
+  en plus synchronisé via Supabase — voir "Historique partagé par classe" plus bas.
 - **Terrain interactif** : `CourtGeometry` définit une seule fois la géométrie des zones
   (fractions 0..1 de la largeur/hauteur), utilisée à la fois par le `CustomPainter` et par
   le détecteur de gestes. Les impacts sont stockés en coordonnées normalisées : la carte
@@ -150,22 +147,21 @@ lib/
 
 ## Ce qui est déjà fait (MVP + évolutions)
 
-Accueil, création de série (élève, mode d'analyse, zone(s) à travailler, réceptionneurs),
-terrain interactif (zones 1-6 + Piscine + OUT + FILET, Piscine sélectionnable partout),
-saisie des 10 services (ligne de fond mordue, type de service, trajectoire "Tendu"/
-"Cloche", qualité du lancer de balle, zone/qualité de réception en mode avec réception),
-alerte visuelle rouge si un service tombe hors de la zone visée, bilan (régularité,
-précision dont services courts 2-3-4 vs longs 5-6-1, variété, trajectoire, efficacité au
-service en mode avec réception, carte des 10 impacts), moteur de conseils à règles,
-comparaison automatique avec la série précédente du même élève, export CSV d'une série,
-historique local (avec repérage des séries "avec réception"), mode démonstration,
-responsive mobile / tablette / desktop / web, publication continue via Netlify + Pull
-Request automatique pour chaque branche de travail.
+Accueil, création de série (élève, classe 2e1-2e5, mode d'analyse, zone(s) à travailler,
+réceptionneurs), terrain interactif (zones 1-6 + Piscine + OUT + FILET, Piscine
+sélectionnable partout), saisie des 10 services (ligne de fond mordue, type de service,
+trajectoire "Tendu"/"Cloche", qualité du lancer de balle, qualité de réception en mode
+avec réception), alerte visuelle rouge si un service tombe hors de la zone visée, bilan
+présenté sous forme de statistiques simples (sans graphique) + carte des 10 impacts, suivi
+d'une réflexion guidée où l'élève répond lui-même à une série de questions à l'aide de ces
+statistiques avant de voir l'axe prioritaire généré par l'appli (sans exercices tout faits,
+ça reste le rôle de l'enseignant), comparaison automatique avec la série précédente du même
+élève, export CSV d'une série, historique local avec partage par classe (Supabase),
+mode démonstration, responsive mobile / tablette / desktop / web, publication continue via
+Netlify + Pull Request automatique pour chaque branche de travail.
 
 ## Prochaines étapes (non incluses dans ce lot)
 
-- **Mode professeur** : vue d'ensemble multi-élèves/multi-classes (bouton déjà présent à
-  l'accueil, affiche pour l'instant un message "bientôt disponible").
 - **Écran de comparaison dédié** : la comparaison existe déjà (badges +X % / +Y zones sur
   le bilan), mais un écran dédié pour comparer deux séries côte à côte reste à faire.
 - **PWA avancée** : `web/manifest.json` par défaut de Flutter est fonctionnel ; mode

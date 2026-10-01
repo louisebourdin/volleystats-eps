@@ -18,13 +18,13 @@ import '../utils/responsive.dart';
 import '../widgets/court/court_marker.dart';
 import '../widgets/court/volley_court_widget.dart';
 import '../widgets/recommendation_card.dart';
-import '../widgets/result_charts.dart';
 import '../widgets/statistic_card.dart';
 import 'home_screen.dart';
 import 'new_session_screen.dart';
 
 /// Bilan de la série (§12-§18) : régularité, précision, variété, carte des
-/// impacts, et conseils personnalisés — jamais uniquement un score.
+/// impacts, puis une réflexion guidée — c'est à l'élève de construire son
+/// propre bilan à partir des stats, pas à l'appli de le faire à sa place.
 class ResultsScreen extends ConsumerWidget {
   /// Si fourni (relecture depuis l'historique), on affiche cette série au
   /// lieu de celle en cours dans [sessionProvider].
@@ -41,7 +41,6 @@ class ResultsScreen extends ConsumerWidget {
 
     final analysis = StatisticsService.analyze(currentSession);
     final recommendations = RecommendationEngine.generate(analysis);
-    final strengths = StatisticsService.strengths(analysis);
 
     final history = ref.watch(historyProvider);
     final sameStudentSessions = history
@@ -68,7 +67,7 @@ class ResultsScreen extends ConsumerWidget {
                 ResponsiveBuilder(
                   builder: (context, size, constraints) {
                     final left = _leftColumn(currentSession, analysis);
-                    final right = _rightColumn(context, currentSession, analysis, recommendations, strengths);
+                    final right = _rightColumn(currentSession, analysis, recommendations);
                     if (size == ScreenSize.mobile) {
                       return Column(children: [...left, const SizedBox(height: 16), ...right]);
                     }
@@ -98,7 +97,10 @@ class ResultsScreen extends ConsumerWidget {
         title: 'Régularité',
         icon: Icons.track_changes_rounded,
         subtitle: 'Faute de pied : ${analysis.footFaultCount} / ${analysis.total}',
-        child: ResultPieChart(inCount: analysis.inCount, outCount: analysis.outCount, netCount: analysis.netCount),
+        child: _CountList(
+          labels: const ['IN', 'OUT', 'FILET'],
+          values: [analysis.inCount, analysis.outCount, analysis.netCount],
+        ),
       ),
       if (session.hasTargetZones) ...[
         const SizedBox(height: 16),
@@ -113,10 +115,9 @@ class ResultsScreen extends ConsumerWidget {
               ? 'Aucune réception relevée sur cette série.'
               : '${analysis.dangerousServeCount} / ${analysis.receptionRecordedCount} services ont mis '
                   'l\'adversaire en danger (${analysis.dangerousServeRate.round()} %).',
-          child: CategoryBarChart(
+          child: _CountList(
             labels: ReceptionQuality.values.map((q) => q.shortLabel).toList(),
             values: ReceptionQuality.values.map((q) => analysis.receptionQualityCounts[q.name] ?? 0).toList(),
-            color: AppColors.warning,
           ),
         ),
       ],
@@ -126,30 +127,27 @@ class ResultsScreen extends ConsumerWidget {
         icon: Icons.grid_view_rounded,
         subtitle: 'Services courts (2, 3, 4) : ${analysis.shortServeCount} · '
             'Services longs (5, 6, 1) : ${analysis.longServeCount}',
-        child: CategoryBarChart(
-          labels: analysis.zoneCountsOrdered.map((e) => CourtZones.shortLabel(e.key)).toList(),
+        child: _CountList(
+          labels: analysis.zoneCountsOrdered.map((e) => CourtZones.label(e.key)).toList(),
           values: analysis.zoneCountsOrdered.map((e) => e.value).toList(),
-          color: AppColors.info,
         ),
       ),
       const SizedBox(height: 16),
       StatisticCard(
         title: 'Types de service',
         icon: Icons.sports_volleyball_outlined,
-        child: CategoryBarChart(
+        child: _CountList(
           labels: analysis.serveTypeCounts.keys.map(_serveTypeShortLabel).toList(),
           values: analysis.serveTypeCounts.values.toList(),
-          color: AppColors.accent,
         ),
       ),
       const SizedBox(height: 16),
       StatisticCard(
         title: 'Trajectoire',
         icon: Icons.show_chart_rounded,
-        child: CategoryBarChart(
+        child: _CountList(
           labels: const ['Tendu', 'Cloche'],
           values: [analysis.fastTrajectoryCount, analysis.slowTrajectoryCount],
-          color: AppColors.primary,
         ),
       ),
       const SizedBox(height: 16),
@@ -179,13 +177,7 @@ class ResultsScreen extends ConsumerWidget {
     ];
   }
 
-  List<Widget> _rightColumn(
-    BuildContext context,
-    Session session,
-    ServeAnalysis analysis,
-    List<Recommendation> recommendations,
-    List<String> strengths,
-  ) {
+  List<Widget> _rightColumn(Session session, ServeAnalysis analysis, List<Recommendation> recommendations) {
     final markers = session.serves.map((s) {
       final Color color;
       switch (s.result) {
@@ -210,41 +202,7 @@ class ResultsScreen extends ConsumerWidget {
         child: VolleyCourtWidget(markers: markers),
       ),
       const SizedBox(height: 16),
-      StatisticCard(
-        title: 'Mon analyse',
-        icon: Icons.insights_rounded,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('1 — Mon résultat', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-            const SizedBox(height: 6),
-            Text('${analysis.inCount} / ${analysis.total} IN — ${analysis.successRatePercent.round()} % de réussite'),
-            const SizedBox(height: 16),
-            const Text('2 — Ce que je fais bien', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-            const SizedBox(height: 6),
-            ...strengths.map(
-              (s) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.check_rounded, size: 16, color: AppColors.success),
-                    const SizedBox(width: 6),
-                    Expanded(child: Text(s)),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 16),
-      const Text('3 & 4 — Mon axe prioritaire et mes exercices', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-      const SizedBox(height: 10),
-      for (final r in recommendations) ...[
-        RecommendationCard(recommendation: r),
-        const SizedBox(height: 12),
-      ],
+      _StudentReflection(session: session, recommendations: recommendations),
     ];
   }
 
@@ -261,6 +219,144 @@ class ResultsScreen extends ConsumerWidget {
       default:
         return id;
     }
+  }
+}
+
+/// Liste simple "label : valeur", utilisée à la place de graphiques pour
+/// garder les statistiques lisibles directement (§ nouvelle présentation du
+/// bilan : les élèves doivent pouvoir lire les chiffres sans interpréter un
+/// graphique).
+class _CountList extends StatelessWidget {
+  final List<String> labels;
+  final List<int> values;
+
+  const _CountList({required this.labels, required this.values});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < labels.length; i++)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(
+              children: [
+                Expanded(child: Text(labels[i])),
+                Text(
+                  '${values[i]}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: values[i] == 0 ? AppColors.textSecondary : AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Questions de réflexion guidée (§ nouvelle présentation du bilan). Pas de
+/// question sur la réception hors mode "avec réception".
+List<String> _reflectionQuestions(Session session) => [
+      'Combien de tes services sont tombés dans le terrain sur 10 ? Es-tu satisfait(e) de ce résultat ?',
+      'En regardant la carte des impacts et la précision par zone : tes services sont-ils plutôt variés ou '
+          'concentrés dans une même zone ?',
+      'As-tu eu des fautes de pied ou des services dans le filet ? Qu\'est-ce que ça t\'apprend sur ton geste ?',
+      'Entre le service tendu et le service en cloche, lequel te réussit le mieux ? Pourquoi, à ton avis ?',
+      if (session.mode == SessionMode.avecReception)
+        'Tes services ont-ils mis l\'adversaire en danger (réceptions ratées ou ace) ? Pourquoi ?',
+      'Selon toi, quel est ton point fort sur cette série ?',
+      'Quel est, selon toi, le point à travailler en priorité pour ta prochaine série ?',
+    ];
+
+/// Réflexion guidée : l'élève répond à une question à la fois, à l'aide des
+/// statistiques affichées sur l'écran. Les réponses ne sont pas sauvegardées
+/// — c'est un support de réflexion, pas une donnée de la série. Une fois
+/// toutes les questions passées, l'axe prioritaire de l'appli s'affiche pour
+/// comparaison (sans les exercices : ça reste le rôle de l'enseignant).
+class _StudentReflection extends StatefulWidget {
+  final Session session;
+  final List<Recommendation> recommendations;
+
+  const _StudentReflection({required this.session, required this.recommendations});
+
+  @override
+  State<_StudentReflection> createState() => _StudentReflectionState();
+}
+
+class _StudentReflectionState extends State<_StudentReflection> {
+  late final List<String> _questions = _reflectionQuestions(widget.session);
+  late final List<TextEditingController> _controllers = [
+    for (var i = 0; i < _questions.length; i++) TextEditingController(),
+  ];
+  int _index = 0;
+
+  @override
+  void dispose() {
+    for (final c in _controllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final finished = _index >= _questions.length;
+    return StatisticCard(
+      title: 'Ton bilan',
+      icon: Icons.edit_note_rounded,
+      subtitle: finished
+          ? 'Voici l\'avis de l\'appli : compare-le avec ta propre réflexion.'
+          : 'Question ${_index + 1} / ${_questions.length} — aide-toi des statistiques ci-dessus.',
+      child: finished ? _buildResult() : _buildQuestion(),
+    );
+  }
+
+  Widget _buildQuestion() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(_questions[_index], style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, height: 1.35)),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _controllers[_index],
+          maxLines: 3,
+          decoration: const InputDecoration(hintText: 'Écris ta réponse ici...', border: OutlineInputBorder()),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            if (_index > 0)
+              OutlinedButton(onPressed: () => setState(() => _index--), child: const Text('Précédent')),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: () => setState(() => _index++),
+              child: Text(_index == _questions.length - 1 ? 'Voir l\'avis de l\'appli' : 'Suivant'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResult() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final r in widget.recommendations) ...[
+          RecommendationCard(recommendation: r),
+          const SizedBox(height: 12),
+        ],
+        OutlinedButton.icon(
+          onPressed: () => setState(() => _index = 0),
+          icon: const Icon(Icons.replay_rounded),
+          label: const Text('Revoir mes réponses'),
+        ),
+      ],
+    );
   }
 }
 
