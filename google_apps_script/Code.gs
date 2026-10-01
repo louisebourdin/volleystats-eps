@@ -35,7 +35,10 @@ function doPost(e) {
 
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var startRow = sheet.getLastRow() + 1;
-    sheet.getRange(startRow, 1, rows.length, rows[0].length).setValues(rows);
+    var range = sheet.getRange(startRow, 1, rows.length, rows[0].length);
+    // Texte brut : sinon Sheets convertit "2e2" (classe) en 200, notation scientifique.
+    range.setNumberFormat('@');
+    range.setValues(rows);
 
     return _jsonResponse({status: 'ok', inserted: rows.length});
   } catch (err) {
