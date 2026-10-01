@@ -636,7 +636,7 @@ class _ActionButtons extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Annuler')),
           FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+            onPressed: () => Navigator.of(dialogContext).pop(SheetsSyncService.normalizeUrl(controller.text)),
             child: const Text('Enregistrer'),
           ),
         ],
