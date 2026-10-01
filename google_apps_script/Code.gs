@@ -4,7 +4,10 @@
  *
  * Installation :
  * 1. Ouvre ton Google Sheets > Extensions > Apps Script.
- * 2. Colle tout le contenu de ce fichier (remplace le code par défaut).
+ * 2. Efface TOUT le code par défaut (y compris "function myFunction() { }"),
+ *    puis colle tout le contenu de ce fichier et enregistre (Ctrl+S). Si le
+ *    code est collé à l'intérieur de myFunction, Google répond
+ *    "Fonction de script introuvable : doPost".
  * 3. En haut de la feuille (ligne 1), renseigne les en-têtes exactement dans
  *    cet ordre (voir aussi le README du projet) :
  *    Eleve | Classe | Date | Mode | Numero | Resultat | Zone | Type de service
