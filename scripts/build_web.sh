@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build de l'appli web, utilisé par Cloudflare Pages (voir README > Déploiement).
+# Build de l'appli web, utilisé par Cloudflare (Worker) (voir README > Déploiement).
 # Flutter n'étant pas préinstallé sur Cloudflare Pages, on clone le SDK stable
 # avant de builder.
 set -euo pipefail

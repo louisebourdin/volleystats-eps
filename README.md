@@ -18,41 +18,52 @@ activé (Paramètres > Confidentialité et sécurité > Pour les développeurs),
 
 ## Déploiement (mise à jour automatique de l'app en ligne)
 
-Ce dépôt GitHub est connecté à **Cloudflare Pages** en déploiement continu (le site
-était auparavant sur Netlify ; basculé car Netlify a mis en pause les déploiements de
-production de ce compte faute de crédits, voir plus bas) :
+L'appli est publiée à deux adresses, toutes deux reliées à ce dépôt GitHub et mises à
+jour à chaque `git push` sur `main` :
 
-- **Chaque `git push` sur la branche `main` déclenche automatiquement** un nouveau
-  build et republie le site — pas besoin de builder ni déployer manuellement.
-- Cloudflare Pages n'a pas Flutter préinstallé : `scripts/build_web.sh` clone le SDK
-  Flutter stable à chaque build avant de lancer `flutter build web --release`. C'est
-  normal si un déploiement prend 2 à 4 minutes.
-- Configuration du projet Cloudflare Pages (Paramètres du projet → Builds &
-  déploiements) :
-  - Commande de build : `bash scripts/build_web.sh`
-  - Répertoire de sortie : `build/web`
-  - Branche de production : `main`
-- `wrangler.jsonc` (à la racine du dépôt) indique à `wrangler deploy` de servir le
-  contenu de `build/web` comme site statique — sans ce fichier, le déploiement
-  "réussit" mais la page est blanche (rien à servir).
-- Pour vérifier qu'un déploiement a réussi : dashboard Cloudflare → Workers & Pages →
-  le projet → onglet "Deployments" → dernier déploiement → logs.
+| Hébergeur | Adresse | Rôle |
+|---|---|---|
+| **Cloudflare Workers** | https://volleystats-eps.louisebourdin8.workers.dev | **Adresse principale** (à donner aux élèves) — toujours à jour |
+| Netlify | https://moonlit-youtiao-44fcd5.netlify.app | Copie de secours — peut avoir du retard (voir quotas ci-dessous) |
 
-**Pour créer/relier le projet Cloudflare Pages** (à faire une seule fois, depuis le
-compte Cloudflare, gratuit) :
-1. https://dash.cloudflare.com → Workers & Pages → Create → Pages → Connect to Git.
-2. Choisir le dépôt `louisebourdin/volleystats-eps`.
-3. Renseigner les 3 champs de build ci-dessus (preset de framework : "None").
-4. Save and Deploy.
+Un déploiement prend 2 à 4 minutes : aucun des deux n'a Flutter préinstallé,
+`scripts/build_web.sh` clone le SDK Flutter stable puis lance
+`flutter build web --release` (sortie dans `build/web`).
 
-### Historique : pourquoi Netlify a été abandonné
+### Cloudflare (Worker avec ressources statiques)
 
-Le site tournait auparavant sur Netlify (`moonlit-youtiao-44fcd5.netlify.app`). Son
-compte est passé en fonctionnement par "crédits opérationnels" et a mis en pause les
-déploiements de production (le site restait en ligne, mais figé sur l'ancienne
-version, les nouveaux push étant marqués "skipped"). Cloudflare Pages a été choisi
-comme remplacement car son plan gratuit ne limite pas les déploiements de cette
-façon.
+C'est un **Worker** Cloudflare (pas un projet "Pages") nommé `volleystats-eps`, compte
+louisebourdin8, relié au dépôt via Workers Builds. Réglages (dashboard Cloudflare →
+Workers & Pages → `volleystats-eps` → Paramètres → Builds) :
+
+- Commande de build : `bash scripts/build_web.sh`
+- Commande de déploiement : `npx wrangler deploy`
+- Répertoire racine : `/`
+- Branche de production : `main`
+
+`wrangler.jsonc` (à la racine du dépôt) indique à `wrangler deploy` de servir le contenu
+de `build/web` comme site statique — sans ce fichier, le déploiement "réussit" mais la
+page est blanche (rien à servir). Pour vérifier un déploiement : onglet "Déploiements"
+du Worker → dernier déploiement → logs.
+
+Pour le recréer depuis zéro : https://dash.cloudflare.com → Workers & Pages → Créer →
+Importer un dépôt Git → `louisebourdin/volleystats-eps` → renseigner les réglages
+ci-dessus.
+
+### Netlify (quota de crédits)
+
+Le compte Netlify (équipe louisebourdin8, plan gratuit) fonctionne par **crédits
+mensuels** ; chaque déploiement de production en consomme. Période de facturation : du
+16 au 15 du mois suivant. Quand le quota est épuisé, Netlify **met en pause les
+déploiements de production** : le site reste en ligne mais figé sur l'ancienne version
+(les nouveaux push sont marqués "Skipped due to account credit usage exceeded").
+
+- C'est arrivé le 1er octobre 2026 (25 builds en septembre, une dizaine en deux jours) :
+  Netlify est resté sur `49a3d3e`.
+- Après la remise à zéro des crédits (le 16), aller dans Netlify → le projet → Deploys
+  → **Trigger deploy** pour republier la dernière version de `main` d'un coup.
+- Pour économiser les crédits : **fusionner dans `main` par lots** (une fusion = un
+  déploiement), pas après chaque petite modification.
 
 **Workflow pour modifier l'app depuis n'importe quelle session Claude Code** (y compris
 depuis un autre appareil) :
@@ -64,7 +75,9 @@ depuis un autre appareil) :
 4. `.github/workflows/open-pr-claude.yml` ouvre automatiquement une Pull Request vers
    `main` dès que cette branche est poussée sur GitHub — il suffit de cliquer
    "Merge" pour publier.
-5. Le site public se met à jour tout seul en 1-4 minutes après le merge sur `main`.
+5. Les sites publics (Cloudflare et Netlify) se mettent à jour tout seuls en 2-4 minutes
+   après le merge sur `main`. Regrouper les modifications avant de fusionner pour ne pas
+   épuiser les crédits Netlify.
 
 ## Historique partagé par classe (Supabase)
 
@@ -118,9 +131,9 @@ séries fictives (élève "Alex") pour présenter l'application sans taper 10 se
 
 - **Sans réception** (par défaut) : analyse classique du service seul (résultat, zone,
   régularité, précision, variété).
-- **Avec réception** : en plus, pour chaque service réussi, on note où repart la
-  réception adverse (zone d'arrivée + "Bonne réception" si la balle repart haute vers
-  le milieu de terrain, ou "Ace" si le point est direct ou la réception ratée). Le
+- **Avec réception** : en plus, pour chaque service réussi, on note la qualité de la
+  réception adverse ("Bonne réception" si la balle repart haute vers le milieu de
+  terrain, ou "Ace" si le point est direct ou la réception ratée). Le
   bilan affiche alors un taux de **"danger provoqué"** au service. On peut aussi
   indiquer (facultatif, informatif) les postes occupés par les réceptionneurs.
 
@@ -194,7 +207,7 @@ statistiques avant de voir l'axe prioritaire généré par l'appli (sans exercic
 ça reste le rôle de l'enseignant), comparaison automatique avec la série précédente du même
 élève, export CSV d'une série, export vers Google Sheets (Web App Apps Script), historique
 local avec partage par classe (Supabase), mode démonstration, responsive mobile / tablette /
-desktop / web, publication continue via Cloudflare Pages + Pull Request automatique
+desktop / web, publication continue via Cloudflare Workers et Netlify + Pull Request automatique
 pour chaque branche de travail.
 
 ## Prochaines étapes (non incluses dans ce lot)
