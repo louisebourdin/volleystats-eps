@@ -360,10 +360,18 @@ class _StudentReflectionState extends State<_StudentReflection> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Le thème impose minimumSize: Size.fromHeight(...) (largeur minimale
+            // infinie, pensé pour les gros boutons pleine largeur) : il faut le
+            // réinitialiser explicitement pour des boutons côte à côte dans un Row.
             _index > 0
-                ? OutlinedButton(onPressed: () => setState(() => _index--), child: const Text('Précédent'))
+                ? OutlinedButton(
+                    style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+                    onPressed: () => setState(() => _index--),
+                    child: const Text('Précédent'),
+                  )
                 : const SizedBox.shrink(),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
               onPressed: _answers[_index] == null ? null : () => setState(() => _index++),
               child: Text(_index == _questions.length - 1 ? 'Voir l\'avis de l\'appli' : 'Suivant'),
             ),
