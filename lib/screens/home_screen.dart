@@ -6,6 +6,7 @@ import '../providers/session_provider.dart';
 import '../services/demo_data_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/responsive.dart';
+import '../widgets/sheets_send_button.dart';
 import 'history_screen.dart';
 import 'new_session_screen.dart';
 import 'results_screen.dart';
@@ -67,6 +68,8 @@ class HomeScreen extends ConsumerWidget {
                     icon: const Icon(Icons.history_rounded),
                     label: const Text('Historique'),
                   ),
+                  const SizedBox(height: 14),
+                  const SheetsSendButton(),
                   const SizedBox(height: 28),
                   const Divider(),
                   const SizedBox(height: 12),

@@ -8,11 +8,9 @@ import '../models/serve_enums.dart';
 import '../models/session.dart';
 import '../providers/history_provider.dart';
 import '../providers/session_provider.dart';
-import '../providers/storage_provider.dart';
 import '../services/csv_downloader/csv_downloader.dart';
 import '../services/csv_export_service.dart';
 import '../services/recommendation_engine.dart';
-import '../services/sheets_sync_service.dart';
 import '../services/statistics_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/french_date.dart';
@@ -20,6 +18,7 @@ import '../utils/responsive.dart';
 import '../widgets/court/court_marker.dart';
 import '../widgets/court/volley_court_widget.dart';
 import '../widgets/recommendation_card.dart';
+import '../widgets/sheets_send_button.dart';
 import '../widgets/statistic_card.dart';
 import 'home_screen.dart';
 import 'new_session_screen.dart';
@@ -608,64 +607,6 @@ class _ActionButtons extends ConsumerWidget {
     }
   }
 
-  /// Dialogue pour coller/modifier l'URL du Web App Apps Script. Retourne
-  /// l'URL enregistrée, ou null si l'utilisateur annule.
-  Future<String?> _configureSheetsUrl(BuildContext context, WidgetRef ref) async {
-    final storage = ref.read(storageServiceProvider);
-    final controller = TextEditingController(text: storage.sheetsWebhookUrl ?? '');
-    final saved = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Lien Google Sheets'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Colle ici l\'URL du Web App Apps Script (se termine par /exec). '
-              'Voir google_apps_script/Code.gs dans le dépôt pour l\'installer sur ton Sheets.',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(hintText: 'https://script.google.com/macros/s/.../exec'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Annuler')),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(SheetsSyncService.normalizeUrl(controller.text)),
-            child: const Text('Enregistrer'),
-          ),
-        ],
-      ),
-    );
-    if (saved != null) {
-      await storage.setSheetsWebhookUrl(saved);
-    }
-    return saved;
-  }
-
-  Future<void> _sendToSheets(BuildContext context, WidgetRef ref) async {
-    final storage = ref.read(storageServiceProvider);
-    var url = storage.sheetsWebhookUrl;
-    if (url == null || url.isEmpty) {
-      url = await _configureSheetsUrl(context, ref);
-      if (url == null || url.isEmpty) return;
-    }
-    if (!context.mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(const SnackBar(content: Text('Envoi en cours...')));
-    try {
-      await SheetsSyncService.send(session: session, webhookUrl: url);
-      messenger.showSnackBar(const SnackBar(content: Text('Série envoyée sur Google Sheets.')));
-    } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))));
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
@@ -687,23 +628,7 @@ class _ActionButtons extends ConsumerWidget {
           label: const Text('Exporter en CSV'),
         ),
         const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _sendToSheets(context, ref),
-                icon: const Icon(Icons.send_outlined),
-                label: const Text('Envoyer vers Google Sheets'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: () => _configureSheetsUrl(context, ref),
-              icon: const Icon(Icons.settings_outlined),
-              tooltip: 'Configurer le lien Google Sheets',
-            ),
-          ],
-        ),
+        SheetsSendButton(session: session),
         const SizedBox(height: 10),
         TextButton.icon(
           onPressed: () {
