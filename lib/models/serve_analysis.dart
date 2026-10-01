@@ -40,6 +40,12 @@ class ServeAnalysis {
   /// des services IN pour lesquels la qualité de la réception a été relevée.
   final Map<String, int> receptionQualityCounts;
 
+  /// Répartition des aces par paramètre du service (mode avec réception
+  /// uniquement) : permet de repérer quel paramètre provoque le danger.
+  final Map<String, int> aceZoneCounts; // clés = CourtZones.*
+  final Map<String, int> aceTrajectoryCounts; // clés = ServeTrajectory.name
+  final Map<String, int> aceServeTypeCounts; // clés = ServeTypes id
+
   const ServeAnalysis({
     required this.total,
     required this.inCount,
@@ -56,6 +62,9 @@ class ServeAnalysis {
     required this.distinctZonesUsed,
     required this.varietyLevel,
     this.receptionQualityCounts = const {},
+    this.aceZoneCounts = const {},
+    this.aceTrajectoryCounts = const {},
+    this.aceServeTypeCounts = const {},
   });
 
   double get successRatePercent => total == 0 ? 0 : (inCount / total) * 100;
@@ -85,4 +94,8 @@ class ServeAnalysis {
   /// mis l'adversaire en danger, en pourcentage.
   double get dangerousServeRate =>
       receptionRecordedCount == 0 ? 0 : dangerousServeCount / receptionRecordedCount * 100;
+
+  /// Zones où atterrissent les aces, dans l'ordre d'affichage standard.
+  List<MapEntry<String, int>> get aceZoneCountsOrdered =>
+      CourtZones.orderedForStats.map((z) => MapEntry(z, aceZoneCounts[z] ?? 0)).toList();
 }

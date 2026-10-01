@@ -120,6 +120,42 @@ class ResultsScreen extends ConsumerWidget {
             values: ReceptionQuality.values.map((q) => analysis.receptionQualityCounts[q.name] ?? 0).toList(),
           ),
         ),
+        if (analysis.dangerousServeCount > 0) ...[
+          const SizedBox(height: 16),
+          StatisticCard(
+            title: 'D\'où viennent tes aces ?',
+            icon: Icons.bolt_rounded,
+            subtitle: 'Regarde si un paramètre revient souvent : c\'est peut-être lui qui provoque le danger.',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Par zone', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                const SizedBox(height: 6),
+                _CountList(
+                  labels: analysis.aceZoneCountsOrdered.map((e) => CourtZones.label(e.key)).toList(),
+                  values: analysis.aceZoneCountsOrdered.map((e) => e.value).toList(),
+                ),
+                const SizedBox(height: 14),
+                const Text('Par trajectoire', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                const SizedBox(height: 6),
+                _CountList(
+                  labels: const ['Tendu', 'Cloche'],
+                  values: [
+                    analysis.aceTrajectoryCounts[ServeTrajectory.tendue.name] ?? 0,
+                    analysis.aceTrajectoryCounts[ServeTrajectory.cloche.name] ?? 0,
+                  ],
+                ),
+                const SizedBox(height: 14),
+                const Text('Par type de service', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                const SizedBox(height: 6),
+                _CountList(
+                  labels: analysis.aceServeTypeCounts.keys.map(_serveTypeShortLabel).toList(),
+                  values: analysis.aceServeTypeCounts.values.toList(),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
       const SizedBox(height: 16),
       StatisticCard(
@@ -202,7 +238,7 @@ class ResultsScreen extends ConsumerWidget {
         child: VolleyCourtWidget(markers: markers),
       ),
       const SizedBox(height: 16),
-      _StudentReflection(session: session, recommendations: recommendations),
+      _StudentReflection(session: session, analysis: analysis, recommendations: recommendations),
     ];
   }
 
@@ -268,8 +304,9 @@ class _ReflectionQuestion {
 
 /// Questions de réflexion guidée (§ nouvelle présentation du bilan), à choix
 /// rapide plutôt qu'à rédiger. Pas de question sur la réception hors mode
-/// "avec réception".
-List<_ReflectionQuestion> _reflectionQuestions(Session session) => [
+/// "avec réception" ; pas de question sur l'origine des aces s'il n'y en a
+/// aucun à analyser.
+List<_ReflectionQuestion> _reflectionQuestions(Session session, ServeAnalysis analysis) => [
       const _ReflectionQuestion(
         'Es-tu satisfait(e) de ton nombre de services réussis sur 10 ?',
         ['Très satisfait(e)', 'Plutôt satisfait(e)', 'Peu satisfait(e)', 'Pas satisfait(e) du tout'],
@@ -286,11 +323,32 @@ List<_ReflectionQuestion> _reflectionQuestions(Session session) => [
         'Quelle trajectoire te réussit le mieux ?',
         ['Le service tendu', 'Le service en cloche', 'Les deux se valent'],
       ),
-      if (session.mode == SessionMode.avecReception)
+      if (session.mode == SessionMode.avecReception) ...[
         const _ReflectionQuestion(
           'Tes services ont-ils mis l\'adversaire en danger ?',
           ['Oui, souvent', 'Parfois', 'Rarement', 'Jamais'],
         ),
+        if (analysis.dangerousServeCount > 0) ...[
+          const _ReflectionQuestion(
+            'Regarde "D\'où viennent tes aces" : sont-ils concentrés sur une zone précise '
+                '(comme la Piscine) ou répartis un peu partout ?',
+            ['Concentrés sur une zone précise', 'Répartis un peu partout', 'Pas assez d\'aces pour voir une tendance'],
+          ),
+          const _ReflectionQuestion(
+            'Tes aces viennent-ils plutôt de services tendus ou en cloche ?',
+            ['Surtout tendus', 'Surtout en cloche', 'Les deux autant', 'Pas assez d\'aces pour voir'],
+          ),
+          const _ReflectionQuestion(
+            'Tes aces viennent-ils plutôt d\'un type de service en particulier ?',
+            ['Oui, un type se démarque nettement', 'Non, réparti entre plusieurs types', 'Pas assez d\'aces pour voir'],
+          ),
+          const _ReflectionQuestion(
+            'D\'après tout ça, qu\'est-ce qui semble le plus provoquer tes aces ? Si un paramètre revient '
+                'souvent, c\'est sans doute un point fort à conserver !',
+            ['La zone visée', 'La trajectoire', 'Le type de service', 'Un mélange de plusieurs facteurs', 'Pas de lien clair pour l\'instant'],
+          ),
+        ],
+      ],
       const _ReflectionQuestion(
         'Quel est ton point fort sur cette série ?',
         ['La régularité', 'La précision (zones visées)', 'La variété', 'La puissance ou la trajectoire'],
@@ -310,16 +368,17 @@ List<_ReflectionQuestion> _reflectionQuestions(Session session) => [
 /// l'enseignant).
 class _StudentReflection extends StatefulWidget {
   final Session session;
+  final ServeAnalysis analysis;
   final List<Recommendation> recommendations;
 
-  const _StudentReflection({required this.session, required this.recommendations});
+  const _StudentReflection({required this.session, required this.analysis, required this.recommendations});
 
   @override
   State<_StudentReflection> createState() => _StudentReflectionState();
 }
 
 class _StudentReflectionState extends State<_StudentReflection> {
-  late final List<_ReflectionQuestion> _questions = _reflectionQuestions(widget.session);
+  late final List<_ReflectionQuestion> _questions = _reflectionQuestions(widget.session, widget.analysis);
   late final List<String?> _answers = List<String?>.filled(_questions.length, null);
   int _index = 0;
 

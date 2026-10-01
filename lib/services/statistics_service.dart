@@ -42,10 +42,17 @@ class StatisticsService {
     }
 
     final receptionQualityCounts = <String, int>{};
+    final aceZoneCounts = <String, int>{};
+    final aceTrajectoryCounts = <String, int>{};
+    final aceServeTypeCounts = <String, int>{};
     for (final s in inServes) {
       final q = s.receptionQuality;
-      if (q != null) {
-        receptionQualityCounts[q.name] = (receptionQualityCounts[q.name] ?? 0) + 1;
+      if (q == null) continue;
+      receptionQualityCounts[q.name] = (receptionQualityCounts[q.name] ?? 0) + 1;
+      if (q == ReceptionQuality.ace) {
+        if (s.zone != null) aceZoneCounts[s.zone!] = (aceZoneCounts[s.zone!] ?? 0) + 1;
+        aceTrajectoryCounts[s.trajectory.name] = (aceTrajectoryCounts[s.trajectory.name] ?? 0) + 1;
+        aceServeTypeCounts[s.serveTypeId] = (aceServeTypeCounts[s.serveTypeId] ?? 0) + 1;
       }
     }
 
@@ -78,6 +85,9 @@ class StatisticsService {
       distinctZonesUsed: distinctZonesUsed,
       varietyLevel: varietyLevel,
       receptionQualityCounts: receptionQualityCounts,
+      aceZoneCounts: aceZoneCounts,
+      aceTrajectoryCounts: aceTrajectoryCounts,
+      aceServeTypeCounts: aceServeTypeCounts,
     );
   }
 
