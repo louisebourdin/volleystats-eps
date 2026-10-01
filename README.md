@@ -18,19 +18,38 @@ activé (Paramètres > Confidentialité et sécurité > Pour les développeurs),
 
 ## Déploiement (mise à jour automatique de l'app en ligne)
 
-Ce dépôt GitHub est connecté à Netlify (site `moonlit-youtiao-44fcd5.netlify.app`,
-alias public : https://moonlit-youtiao-44fcd5.netlify.app) en déploiement continu :
+Ce dépôt GitHub est connecté à **Cloudflare Pages** en déploiement continu (le site
+était auparavant sur Netlify ; basculé car Netlify a mis en pause les déploiements de
+production de ce compte faute de crédits, voir plus bas) :
 
 - **Chaque `git push` sur la branche `main` déclenche automatiquement** un nouveau
   build et republie le site — pas besoin de builder ni déployer manuellement.
-- Netlify n'a pas Flutter préinstallé : la commande de build (configurée dans les
-  paramètres du site Netlify, onglet "Build & deploy") clone le SDK Flutter stable à
-  chaque build avant de lancer `flutter build web`. C'est normal si un déploiement
-  prend 2 à 4 minutes. La commande nettoie d'abord le dossier `_flutter_sdk` avant de
-  cloner (`rm -rf _flutter_sdk && git clone ...`) pour éviter un échec si un build
-  précédent a été interrompu en cours de clonage.
-- Pour vérifier qu'un déploiement a réussi : dashboard Netlify du projet → onglet
-  "Deploys" → dernier déploiement → logs.
+- Cloudflare Pages n'a pas Flutter préinstallé : `scripts/build_web.sh` clone le SDK
+  Flutter stable à chaque build avant de lancer `flutter build web --release`. C'est
+  normal si un déploiement prend 2 à 4 minutes.
+- Configuration du projet Cloudflare Pages (Paramètres du projet → Builds &
+  déploiements) :
+  - Commande de build : `bash scripts/build_web.sh`
+  - Répertoire de sortie : `build/web`
+  - Branche de production : `main`
+- Pour vérifier qu'un déploiement a réussi : dashboard Cloudflare → Workers & Pages →
+  le projet → onglet "Deployments" → dernier déploiement → logs.
+
+**Pour créer/relier le projet Cloudflare Pages** (à faire une seule fois, depuis le
+compte Cloudflare, gratuit) :
+1. https://dash.cloudflare.com → Workers & Pages → Create → Pages → Connect to Git.
+2. Choisir le dépôt `louisebourdin/volleystats-eps`.
+3. Renseigner les 3 champs de build ci-dessus (preset de framework : "None").
+4. Save and Deploy.
+
+### Historique : pourquoi Netlify a été abandonné
+
+Le site tournait auparavant sur Netlify (`moonlit-youtiao-44fcd5.netlify.app`). Son
+compte est passé en fonctionnement par "crédits opérationnels" et a mis en pause les
+déploiements de production (le site restait en ligne, mais figé sur l'ancienne
+version, les nouveaux push étant marqués "skipped"). Cloudflare Pages a été choisi
+comme remplacement car son plan gratuit ne limite pas les déploiements de cette
+façon.
 
 **Workflow pour modifier l'app depuis n'importe quelle session Claude Code** (y compris
 depuis un autre appareil) :
@@ -172,8 +191,8 @@ statistiques avant de voir l'axe prioritaire généré par l'appli (sans exercic
 ça reste le rôle de l'enseignant), comparaison automatique avec la série précédente du même
 élève, export CSV d'une série, export vers Google Sheets (Web App Apps Script), historique
 local avec partage par classe (Supabase), mode démonstration, responsive mobile / tablette /
-desktop / web, publication continue via Netlify + Pull Request automatique pour chaque
-branche de travail.
+desktop / web, publication continue via Cloudflare Pages + Pull Request automatique
+pour chaque branche de travail.
 
 ## Prochaines étapes (non incluses dans ce lot)
 
