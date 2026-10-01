@@ -258,25 +258,56 @@ class _CountList extends StatelessWidget {
   }
 }
 
-/// Questions de réflexion guidée (§ nouvelle présentation du bilan). Pas de
-/// question sur la réception hors mode "avec réception".
-List<String> _reflectionQuestions(Session session) => [
-      'Combien de tes services sont tombés dans le terrain sur 10 ? Es-tu satisfait(e) de ce résultat ?',
-      'En regardant la carte des impacts et la précision par zone : tes services sont-ils plutôt variés ou '
-          'concentrés dans une même zone ?',
-      'As-tu eu des fautes de pied ou des services dans le filet ? Qu\'est-ce que ça t\'apprend sur ton geste ?',
-      'Entre le service tendu et le service en cloche, lequel te réussit le mieux ? Pourquoi, à ton avis ?',
+/// Une question de réflexion guidée à choix unique.
+class _ReflectionQuestion {
+  final String text;
+  final List<String> options;
+
+  const _ReflectionQuestion(this.text, this.options);
+}
+
+/// Questions de réflexion guidée (§ nouvelle présentation du bilan), à choix
+/// rapide plutôt qu'à rédiger. Pas de question sur la réception hors mode
+/// "avec réception".
+List<_ReflectionQuestion> _reflectionQuestions(Session session) => [
+      const _ReflectionQuestion(
+        'Es-tu satisfait(e) de ton nombre de services réussis sur 10 ?',
+        ['Très satisfait(e)', 'Plutôt satisfait(e)', 'Peu satisfait(e)', 'Pas satisfait(e) du tout'],
+      ),
+      const _ReflectionQuestion(
+        'Tes services sont-ils plutôt...',
+        ['Très variés (plusieurs zones)', 'Assez variés', 'Concentrés sur une seule zone'],
+      ),
+      const _ReflectionQuestion(
+        'As-tu eu des fautes de pied ou des services dans le filet ?',
+        ['Aucune', 'Une ou deux', 'Plusieurs — à travailler'],
+      ),
+      const _ReflectionQuestion(
+        'Quelle trajectoire te réussit le mieux ?',
+        ['Le service tendu', 'Le service en cloche', 'Les deux se valent'],
+      ),
       if (session.mode == SessionMode.avecReception)
-        'Tes services ont-ils mis l\'adversaire en danger (réceptions ratées ou ace) ? Pourquoi ?',
-      'Selon toi, quel est ton point fort sur cette série ?',
-      'Quel est, selon toi, le point à travailler en priorité pour ta prochaine série ?',
+        const _ReflectionQuestion(
+          'Tes services ont-ils mis l\'adversaire en danger ?',
+          ['Oui, souvent', 'Parfois', 'Rarement', 'Jamais'],
+        ),
+      const _ReflectionQuestion(
+        'Quel est ton point fort sur cette série ?',
+        ['La régularité', 'La précision (zones visées)', 'La variété', 'La puissance ou la trajectoire'],
+      ),
+      const _ReflectionQuestion(
+        'Quel est le point à travailler en priorité pour ta prochaine série ?',
+        ['La régularité', 'La précision', 'La variété', 'Les fautes de pied ou le filet'],
+      ),
     ];
 
-/// Réflexion guidée : l'élève répond à une question à la fois, à l'aide des
-/// statistiques affichées sur l'écran. Les réponses ne sont pas sauvegardées
-/// — c'est un support de réflexion, pas une donnée de la série. Une fois
-/// toutes les questions passées, l'axe prioritaire de l'appli s'affiche pour
-/// comparaison (sans les exercices : ça reste le rôle de l'enseignant).
+/// Réflexion guidée : l'élève répond à une question à la fois, en touchant
+/// l'option qui lui correspond (à l'aide des statistiques affichées sur
+/// l'écran) — rapide, pas besoin de rédiger. Les réponses ne sont pas
+/// sauvegardées — c'est un support de réflexion, pas une donnée de la série.
+/// Une fois toutes les questions passées, l'axe prioritaire de l'appli
+/// s'affiche pour comparaison (sans les exercices : ça reste le rôle de
+/// l'enseignant).
 class _StudentReflection extends StatefulWidget {
   final Session session;
   final List<Recommendation> recommendations;
@@ -288,19 +319,9 @@ class _StudentReflection extends StatefulWidget {
 }
 
 class _StudentReflectionState extends State<_StudentReflection> {
-  late final List<String> _questions = _reflectionQuestions(widget.session);
-  late final List<TextEditingController> _controllers = [
-    for (var i = 0; i < _questions.length; i++) TextEditingController(),
-  ];
+  late final List<_ReflectionQuestion> _questions = _reflectionQuestions(widget.session);
+  late final List<String?> _answers = List<String?>.filled(_questions.length, null);
   int _index = 0;
-
-  @override
-  void dispose() {
-    for (final c in _controllers) {
-      c.dispose();
-    }
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -316,15 +337,24 @@ class _StudentReflectionState extends State<_StudentReflection> {
   }
 
   Widget _buildQuestion() {
+    final question = _questions[_index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(_questions[_index], style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, height: 1.35)),
+        Text(question.text, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, height: 1.35)),
         const SizedBox(height: 12),
-        TextField(
-          controller: _controllers[_index],
-          maxLines: 3,
-          decoration: const InputDecoration(hintText: 'Écris ta réponse ici...', border: OutlineInputBorder()),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: question.options
+              .map(
+                (option) => ChoiceChip(
+                  label: Text(option),
+                  selected: _answers[_index] == option,
+                  onSelected: (_) => setState(() => _answers[_index] = option),
+                ),
+              )
+              .toList(),
         ),
         const SizedBox(height: 14),
         Row(
@@ -334,7 +364,7 @@ class _StudentReflectionState extends State<_StudentReflection> {
                 ? OutlinedButton(onPressed: () => setState(() => _index--), child: const Text('Précédent'))
                 : const SizedBox.shrink(),
             ElevatedButton(
-              onPressed: () => setState(() => _index++),
+              onPressed: _answers[_index] == null ? null : () => setState(() => _index++),
               child: Text(_index == _questions.length - 1 ? 'Voir l\'avis de l\'appli' : 'Suivant'),
             ),
           ],
