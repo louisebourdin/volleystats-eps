@@ -13,6 +13,7 @@ class StorageService {
   static const String _pendingUploadsKey = 'pendingUploads';
   static const String _pendingDeletesKey = 'pendingDeletes';
   static const String _migratedKey = 'migratedToRemote';
+  static const String _sheetsWebhookUrlKey = 'sheetsWebhookUrl';
   Box? _box;
   Box? _settings;
 
@@ -87,4 +88,12 @@ class StorageService {
   bool get migratedToRemote => _requireSettings.get(_migratedKey) as bool? ?? false;
 
   Future<void> setMigratedToRemote() => _requireSettings.put(_migratedKey, true);
+
+  // --- Export vers Google Sheets ---
+
+  /// URL du Web App Apps Script (voir google_apps_script/Code.gs), configurée
+  /// une fois par l'enseignant·e. null/vide = export Google Sheets désactivé.
+  String? get sheetsWebhookUrl => _requireSettings.get(_sheetsWebhookUrlKey) as String?;
+
+  Future<void> setSheetsWebhookUrl(String url) => _requireSettings.put(_sheetsWebhookUrlKey, url);
 }

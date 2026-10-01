@@ -71,6 +71,20 @@ Pour repartir d'un nouveau projet : SQL Editor → coller `supabase/schema.sql` 
 mettre la nouvelle URL et la clé publishable dans `lib/config/supabase_config.dart` (ou au
 build : `--dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`).
 
+## Export vers Google Sheets
+
+Depuis le bilan d'une série, le bouton **"Envoyer vers Google Sheets"** ajoute les 10
+services en bas d'un tableur, via un Web App Apps Script (`google_apps_script/Code.gs`).
+L'URL du Web App se configure une fois dans l'appli (icône réglages à côté du bouton,
+champ sauvegardé en local sur l'appareil) — voir les instructions d'installation en tête
+de `Code.gs`. Les colonnes envoyées (en-tête à renseigner sur la ligne 1 du tableur, même
+ordre que l'export CSV) :
+
+```
+Eleve | Classe | Date | Mode | Numero | Resultat | Zone | Type de service
+| Trajectoire | Ligne de fond mordue | Qualite du lancer | Qualite de la reception
+```
+
 ## Utilisation rapide
 
 Depuis l'accueil : **Nouvelle série** → renseigner l'élève → choisir le **mode
@@ -156,9 +170,10 @@ présenté sous forme de statistiques simples (sans graphique) + carte des 10 im
 d'une réflexion guidée où l'élève répond lui-même à une série de questions à l'aide de ces
 statistiques avant de voir l'axe prioritaire généré par l'appli (sans exercices tout faits,
 ça reste le rôle de l'enseignant), comparaison automatique avec la série précédente du même
-élève, export CSV d'une série, historique local avec partage par classe (Supabase),
-mode démonstration, responsive mobile / tablette / desktop / web, publication continue via
-Netlify + Pull Request automatique pour chaque branche de travail.
+élève, export CSV d'une série, export vers Google Sheets (Web App Apps Script), historique
+local avec partage par classe (Supabase), mode démonstration, responsive mobile / tablette /
+desktop / web, publication continue via Netlify + Pull Request automatique pour chaque
+branche de travail.
 
 ## Prochaines étapes (non incluses dans ce lot)
 

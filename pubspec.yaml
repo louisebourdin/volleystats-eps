@@ -49,6 +49,9 @@ dependencies:
   # Historique partagé par classe (base Supabase, voir supabase/schema.sql)
   supabase: ^2.16.2
 
+  # Export vers Google Sheets (voir google_apps_script/Code.gs)
+  http: ^1.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

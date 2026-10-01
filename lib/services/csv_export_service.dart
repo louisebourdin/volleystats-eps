@@ -23,13 +23,13 @@ class CsvExportService {
     'Qualite de la reception',
   ];
 
-  static String build(Session session) {
-    final buffer = StringBuffer()
-      ..write('﻿'); // BOM UTF-8 : accents affichés correctement à l'ouverture directe dans Excel.
-    buffer.writeln(_columns.map(_escape).join(';'));
-
+  /// Les lignes de la série, en-tête compris (première ligne = [_columns]).
+  /// Source commune pour l'export CSV et l'envoi vers Google Sheets : un
+  /// seul endroit qui connaît l'ordre et le contenu des colonnes.
+  static List<List<String>> rows(Session session) {
+    final result = <List<String>>[_columns];
     for (final s in session.serves) {
-      final row = [
+      result.add([
         session.student.name,
         session.student.className,
         formatShortFrenchDate(session.date),
@@ -42,10 +42,17 @@ class CsvExportService {
         s.footFault ? 'Oui' : 'Non',
         s.tossQuality?.label ?? '',
         s.receptionQuality?.label ?? '',
-      ];
+      ]);
+    }
+    return result;
+  }
+
+  static String build(Session session) {
+    final buffer = StringBuffer()
+      ..write('﻿'); // BOM UTF-8 : accents affichés correctement à l'ouverture directe dans Excel.
+    for (final row in rows(session)) {
       buffer.writeln(row.map(_escape).join(';'));
     }
-
     return buffer.toString();
   }
 
