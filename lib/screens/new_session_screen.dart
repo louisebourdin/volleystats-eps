@@ -9,6 +9,7 @@ import '../providers/history_provider.dart';
 import '../providers/session_provider.dart';
 import '../theme/app_colors.dart';
 import '../utils/french_date.dart';
+import '../utils/name_validator.dart';
 import '../utils/responsive.dart';
 import '../widgets/court/volley_court_widget.dart';
 import 'serve_screen.dart';
@@ -42,11 +43,13 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
     super.dispose();
   }
 
-  bool get _canStart => _nameController.text.trim().isNotEmpty && _className != null;
+  String? get _nameError => validateName(_nameController.text);
+
+  bool get _canStart => _nameController.text.trim().isNotEmpty && _nameError == null && _className != null;
 
   void _start() {
     final student = Student(
-      name: _nameController.text.trim(),
+      name: cleanName(_nameController.text),
       className: _className!,
       dominantHand: DominantHand.droitier,
       mainServeTypeId: ServeTypes.tennis.id,
@@ -102,7 +105,14 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
                 TextField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(labelText: 'Prénom ou pseudonyme', prefixIcon: Icon(Icons.person_outline_rounded)),
+                  inputFormatters: kNameInputFormatters,
+                  autocorrect: false,
+                  decoration: InputDecoration(
+                    labelText: 'Prénom ou pseudonyme',
+                    prefixIcon: const Icon(Icons.person_outline_rounded),
+                    helperText: 'Lettres uniquement, $kNameMaxLength caractères max.',
+                    errorText: _nameError,
+                  ),
                   onChanged: (_) => setState(() {}),
                 ),
                 const SizedBox(height: 16),
