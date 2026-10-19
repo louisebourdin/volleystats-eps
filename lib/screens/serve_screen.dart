@@ -82,7 +82,7 @@ class ServeScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ServeProgressIndicator(current: displayNumber),
+                ServeProgressIndicator(current: displayNumber, total: session.targetServeCount),
                 if (session.hasTargetZones) ...[
                   const SizedBox(height: 10),
                   _TargetZonesBanner(zoneIds: session.targetZones),

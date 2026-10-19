@@ -233,7 +233,7 @@ class ResultsScreen extends ConsumerWidget {
 
     return [
       StatisticCard(
-        title: 'Carte des 10 impacts',
+        title: 'Carte des ${session.serves.length} impacts',
         icon: Icons.map_outlined,
         subtitle: 'Vert = IN · Rouge = OUT · Orange = FILET',
         child: VolleyCourtWidget(markers: markers),
@@ -308,9 +308,9 @@ class _ReflectionQuestion {
 /// "avec réception" ; pas de question sur l'origine des aces s'il n'y en a
 /// aucun à analyser.
 List<_ReflectionQuestion> _reflectionQuestions(Session session, ServeAnalysis analysis) => [
-      const _ReflectionQuestion(
-        'Es-tu satisfait(e) de ton nombre de services réussis sur 10 ?',
-        ['Très satisfait(e)', 'Plutôt satisfait(e)', 'Peu satisfait(e)', 'Pas satisfait(e) du tout'],
+      _ReflectionQuestion(
+        'Es-tu satisfait(e) de ton nombre de services réussis sur ${session.serves.length} ?',
+        const ['Très satisfait(e)', 'Plutôt satisfait(e)', 'Peu satisfait(e)', 'Pas satisfait(e) du tout'],
       ),
       const _ReflectionQuestion(
         'Tes services sont-ils plutôt...',

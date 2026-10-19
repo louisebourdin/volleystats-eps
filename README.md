@@ -1,7 +1,8 @@
 # VolleyStats EPS
 
 **Analyse et améliore ton service** — application Flutter multiplateforme (Android, iOS,
-Web, Windows, macOS) pour analyser des séries de 10 services au volley-ball en cours d'EPS.
+Web, Windows, macOS) pour analyser des séries de services (5 à 15 au choix) au
+volley-ball en cours d'EPS.
 
 ## Lancer le projet
 
@@ -122,10 +123,11 @@ Eleve | Classe | Date | Mode | Numero | Resultat | Zone | Type de service
 
 ## Utilisation rapide
 
-Depuis l'accueil : **Nouvelle série** → renseigner l'élève → choisir le **mode
-d'analyse** (voir ci-dessous) → toucher le terrain après chaque service → bilan
-automatique après le 10e service. Le bouton **Charger une démonstration** remplit deux
-séries fictives (élève "Alex") pour présenter l'application sans taper 10 services réels.
+Depuis l'accueil : **Nouvelle série** → renseigner l'élève → choisir le **nombre de
+services** (5 à 15, 10 par défaut) et le **mode d'analyse** (voir ci-dessous) → toucher
+le terrain après chaque service → bilan automatique une fois le nombre choisi atteint.
+Le bouton **Charger une démonstration** remplit deux séries fictives de 10 services
+(élève "Alex") pour présenter l'application sans en taper réellement.
 
 ### Deux modes d'analyse
 
@@ -196,12 +198,13 @@ lib/
 
 ## Ce qui est déjà fait (MVP + évolutions)
 
-Accueil, création de série (élève, classe 2e1-2e5, mode d'analyse, zone(s) à travailler,
-réceptionneurs), terrain interactif (zones 1-6 + Piscine + OUT + FILET, Piscine
-sélectionnable partout), saisie des 10 services (ligne de fond mordue, type de service,
-trajectoire "Tendu"/"Cloche", qualité du lancer de balle, qualité de réception en mode
-avec réception), alerte visuelle rouge si un service tombe hors de la zone visée, bilan
-présenté sous forme de statistiques simples (sans graphique) + carte des 10 impacts, suivi
+Accueil, création de série (élève, classe 2e1-2e5, nombre de services de 5 à 15 au choix,
+mode d'analyse, zone(s) à travailler, réceptionneurs), terrain interactif (zones 1-6 +
+Piscine + OUT + FILET, Piscine sélectionnable partout), saisie des services (ligne de
+fond mordue, type de service, trajectoire "Tendu"/"Cloche", qualité du lancer de balle,
+qualité de réception en mode avec réception), alerte visuelle rouge si un service tombe
+hors de la zone visée, bilan présenté sous forme de statistiques simples (sans graphique)
++ carte des impacts, suivi
 d'une réflexion guidée où l'élève répond lui-même à une série de questions à l'aide de ces
 statistiques avant de voir l'axe prioritaire généré par l'appli (sans exercices tout faits,
 ça reste le rôle de l'enseignant), comparaison automatique avec la série précédente du même

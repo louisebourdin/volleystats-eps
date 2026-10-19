@@ -24,6 +24,7 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
   final _nameController = TextEditingController();
   String? _className;
   final Set<String> _targetZones = {};
+  int _serveCount = kServesPerSession;
   SessionMode _mode = SessionMode.sansReception;
   final Set<String> _receptionZones = {};
 
@@ -52,6 +53,7 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
     );
     ref.read(sessionProvider.notifier).startSession(
           student,
+          targetServeCount: _serveCount,
           targetZones: _targetZones.toList(),
           mode: _mode,
           receptionZones: _receptionZones.toList(),
@@ -109,6 +111,13 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
                   decoration: const InputDecoration(labelText: 'Classe', prefixIcon: Icon(Icons.groups_outlined)),
                   items: [for (final c in kSchoolClasses) DropdownMenuItem(value: c, child: Text(c))],
                   onChanged: (value) => setState(() => _className = value),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<int>(
+                  initialValue: _serveCount,
+                  decoration: const InputDecoration(labelText: 'Nombre de services', prefixIcon: Icon(Icons.sports_volleyball_outlined)),
+                  items: [for (final n in kServeCountOptions) DropdownMenuItem(value: n, child: Text('$n services'))],
+                  onChanged: (value) => setState(() => _serveCount = value ?? kServesPerSession),
                 ),
                 const SizedBox(height: 24),
                 const Text('Zone(s) à travailler', style: TextStyle(fontWeight: FontWeight.w700)),
@@ -205,7 +214,7 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _canStart ? _start : null,
-                  child: const Text('Commencer les 10 services'),
+                  child: Text('Commencer les $_serveCount services'),
                 ),
                 const SizedBox(height: 12),
               ],

@@ -3,6 +3,9 @@ import 'student.dart';
 
 const int kServesPerSession = 10;
 
+/// Nombre de services proposés au choix à la création d'une série (5 à 15).
+const List<int> kServeCountOptions = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+
 /// Une série peut être analysée seule (défaut) ou avec la réception adverse,
 /// pour mesurer le danger provoqué par chaque service (§ nouvelle fonctionnalité).
 enum SessionMode { sansReception, avecReception }
@@ -14,12 +17,16 @@ extension SessionModeX on SessionMode {
       SessionMode.values.firstWhere((e) => e.name == name, orElse: () => SessionMode.sansReception);
 }
 
-/// Une série de [kServesPerSession] services réalisée par un élève.
+/// Une série de [targetServeCount] services réalisée par un élève.
 class Session {
   final String id;
   final Student student;
   final DateTime date;
   final List<Serve> serves;
+
+  /// Nombre de services à réaliser pour que la série soit complète (choisi à
+  /// la création, entre 5 et 15 — voir [kServeCountOptions]).
+  final int targetServeCount;
 
   /// Zone(s) que l'élève a choisi de travailler précisément pour cette
   /// séance (parmi CourtZones.zone1..zone6). Vide = entraînement libre.
@@ -38,12 +45,13 @@ class Session {
     required this.student,
     required this.date,
     this.serves = const [],
+    this.targetServeCount = kServesPerSession,
     this.targetZones = const [],
     this.mode = SessionMode.sansReception,
     this.receptionZones = const [],
   });
 
-  bool get isComplete => serves.length >= kServesPerSession;
+  bool get isComplete => serves.length >= targetServeCount;
   int get nextServeNumber => serves.length + 1;
   bool get hasTargetZones => targetZones.isNotEmpty;
 
@@ -52,6 +60,7 @@ class Session {
     Student? student,
     DateTime? date,
     List<Serve>? serves,
+    int? targetServeCount,
     List<String>? targetZones,
     SessionMode? mode,
     List<String>? receptionZones,
@@ -61,6 +70,7 @@ class Session {
       student: student ?? this.student,
       date: date ?? this.date,
       serves: serves ?? this.serves,
+      targetServeCount: targetServeCount ?? this.targetServeCount,
       targetZones: targetZones ?? this.targetZones,
       mode: mode ?? this.mode,
       receptionZones: receptionZones ?? this.receptionZones,
@@ -72,6 +82,7 @@ class Session {
         'student': student.toJson(),
         'date': date.toIso8601String(),
         'serves': serves.map((s) => s.toJson()).toList(),
+        'targetServeCount': targetServeCount,
         'targetZones': targetZones,
         'mode': mode.name,
         'receptionZones': receptionZones,
@@ -84,6 +95,9 @@ class Session {
         serves: (json['serves'] as List)
             .map((e) => Serve.fromJson(Map<dynamic, dynamic>.from(e as Map)))
             .toList(),
+        // Séries enregistrées avant l'ajout du nombre de services au choix :
+        // elles étaient toutes des séries de 10.
+        targetServeCount: (json['targetServeCount'] as int?) ?? kServesPerSession,
         targetZones: (json['targetZones'] as List?)?.map((e) => e as String).toList() ?? const [],
         mode: SessionModeX.fromName(json['mode'] as String?),
         receptionZones: (json['receptionZones'] as List?)?.map((e) => e as String).toList() ?? const [],

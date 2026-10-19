@@ -44,6 +44,7 @@ class SessionNotifier extends StateNotifier<SessionState> {
   void startSession(
     Student student, {
     DateTime? date,
+    int targetServeCount = kServesPerSession,
     List<String> targetZones = const [],
     SessionMode mode = SessionMode.sansReception,
     List<String> receptionZones = const [],
@@ -54,6 +55,7 @@ class SessionNotifier extends StateNotifier<SessionState> {
         student: student,
         date: date ?? DateTime.now(),
         serves: const [],
+        targetServeCount: targetServeCount,
         targetZones: targetZones,
         mode: mode,
         receptionZones: receptionZones,
