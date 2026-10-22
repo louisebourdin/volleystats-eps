@@ -32,6 +32,13 @@ class SheetsSyncService {
   static String normalizeUrl(String url) =>
       url.trim().replaceFirst(RegExp(r'/macros/u/\d+/s/'), '/macros/s/');
 
+  /// L'appli ne sert que des classes de seconde ("2e1".."2e5") : sur Sheets,
+  /// la colonne Classe n'affiche que le numéro ("2e1" -> "1"). Si le format
+  /// ne contient pas de chiffre (ne devrait pas arriver), renvoie la classe
+  /// telle quelle plutôt que de perdre l'information.
+  static String _classNumber(String className) =>
+      RegExp(r'(\d+)$').firstMatch(className)?.group(1) ?? className;
+
   /// La ligne de résumé envoyée pour [session] (ordre : voir [columns]).
   static List<String> summaryRow(Session session) {
     final targetZoneLabels =
@@ -45,7 +52,7 @@ class SheetsSyncService {
 
     return [
       formatShortFrenchDate(session.date),
-      session.student.className,
+      _classNumber(session.student.className),
       session.student.name,
       session.serves.length.toString(),
       targetZoneLabels,

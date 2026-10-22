@@ -14,7 +14,9 @@ void main() {
     final row = SheetsSyncService.summaryRow(session);
 
     expect(row.length, SheetsSyncService.columns.length);
-    expect(row[1], session.student.className);
+    // L'appli ne sert que des classes de seconde : seul le numéro est gardé
+    // ("2e4"/"2nde 4" -> "4"), pas le libellé complet de la classe.
+    expect(row[1], '4');
     expect(row[2], session.student.name);
     expect(row[3], '10');
     expect(row[4], contains('5'));
