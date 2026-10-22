@@ -9,9 +9,11 @@
  *    code est collé à l'intérieur de myFunction, Google répond
  *    "Fonction de script introuvable : doPost".
  * 3. En haut de la feuille (ligne 1), renseigne les en-têtes exactement dans
- *    cet ordre (voir aussi le README du projet) :
- *    Eleve | Classe | Date | Mode | Numero | Resultat | Zone | Type de service
- *    | Trajectoire | Ligne de fond mordue | Qualite du lancer | Qualite de la reception
+ *    cet ordre (voir aussi le README du projet). Une seule ligne est ajoutée
+ *    par série envoyée (résumé, pas le détail service par service — pour ça
+ *    il y a l'export CSV) :
+ *    Eleve | Classe | Date | Mode | Nombre de services | Zone(s) visee(s)
+ *    | Postes receptionneurs | Services dans la zone visee
  * 4. Déployer > Nouveau déploiement > type "Application Web".
  *    - Exécuter en tant que : Moi
  *    - Qui a accès : Tous les utilisateurs

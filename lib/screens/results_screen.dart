@@ -94,6 +94,8 @@ class ResultsScreen extends ConsumerWidget {
 
   List<Widget> _leftColumn(Session session, ServeAnalysis analysis) {
     return [
+      _ObjectiveCard(session: session),
+      const SizedBox(height: 16),
       StatisticCard(
         title: 'Régularité',
         icon: Icons.track_changes_rounded,
@@ -103,10 +105,6 @@ class ResultsScreen extends ConsumerWidget {
           values: [analysis.inCount, analysis.outCount, analysis.netCount],
         ),
       ),
-      if (session.hasTargetZones) ...[
-        const SizedBox(height: 16),
-        _TargetZoneCard(session: session),
-      ],
       if (session.mode == SessionMode.avecReception) ...[
         const SizedBox(height: 16),
         StatisticCard(
@@ -459,16 +457,20 @@ class _StudentReflectionState extends State<_StudentReflection> {
   }
 }
 
-/// Bilan spécifique à la ou aux zones que l'élève avait choisi de travailler
-/// avant de démarrer la série (§ nouvelle fonctionnalité : objectif de zone).
-class _TargetZoneCard extends StatelessWidget {
+/// Rappelle, en tête du bilan, ce que l'élève avait pour objectif en
+/// démarrant la série : le choix des zones à travailler définit lui-même cet
+/// objectif (ex. toutes les zones = mettre la balle "in", les 3 zones avant
+/// = services courts...) — on l'affiche tel quel, sans l'interpréter.
+class _ObjectiveCard extends StatelessWidget {
   final Session session;
 
-  const _TargetZoneCard({required this.session});
+  const _ObjectiveCard({required this.session});
 
   @override
   Widget build(BuildContext context) {
-    final zoneLabels = (session.targetZones.toList()..sort()).map(CourtZones.label).join(', ');
+    final hasZones = session.hasTargetZones;
+    final zoneLabels =
+        hasZones ? (session.targetZones.toList()..sort()).map(CourtZones.label).join(', ') : 'Non renseigné';
     final hits = session.serves
         .where((s) => s.result == ServeResult.inCourt && session.targetZones.contains(s.zone))
         .length;
@@ -478,20 +480,36 @@ class _TargetZoneCard extends StatelessWidget {
     return StatisticCard(
       title: 'Objectif de la séance',
       icon: Icons.track_changes_rounded,
-      subtitle: 'Zone(s) visée(s) : $zoneLabels',
-      child: Row(
+      subtitle: session.mode.label,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            hits >= total / 2 ? Icons.check_circle_rounded : Icons.info_outline_rounded,
-            color: hits >= total / 2 ? AppColors.success : AppColors.accent,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              '$hits / $total services sont tombés dans la zone visée ($pct %).',
+          Text('Zone(s) visée(s) : $zoneLabels', style: const TextStyle(fontWeight: FontWeight.w600)),
+          if (session.mode == SessionMode.avecReception) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Postes réceptionneurs : ${session.receptionZones.isEmpty ? 'Non renseigné' : (session.receptionZones.toList()..sort()).map(CourtZones.label).join(', ')}',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
-          ),
+          ],
+          if (hasZones) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(
+                  hits >= total / 2 ? Icons.check_circle_rounded : Icons.info_outline_rounded,
+                  color: hits >= total / 2 ? AppColors.success : AppColors.accent,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '$hits / $total services sont tombés dans la zone visée ($pct %).',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

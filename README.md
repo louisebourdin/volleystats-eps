@@ -109,17 +109,23 @@ build : `--dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`).
 
 ## Export vers Google Sheets
 
-Depuis le bilan d'une série, le bouton **"Envoyer vers Google Sheets"** ajoute les 10
-services en bas d'un tableur, via un Web App Apps Script (`google_apps_script/Code.gs`).
-L'URL du Web App se configure une fois dans l'appli (icône réglages à côté du bouton,
-champ sauvegardé en local sur l'appareil) — voir les instructions d'installation en tête
-de `Code.gs`. Les colonnes envoyées (en-tête à renseigner sur la ligne 1 du tableur, même
-ordre que l'export CSV) :
+Depuis le bilan d'une série (ou depuis l'accueil, qui propose de choisir une série de
+l'historique), le bouton **"Envoyer vers Google Sheets"** ajoute **une seule ligne résumé**
+en bas d'un tableur, via un Web App Apps Script (`google_apps_script/Code.gs`) — à la
+différence de l'export CSV, qui lui reste détaillé service par service. L'URL du Web App
+se configure une fois dans l'appli (icône réglages à côté du bouton, champ sauvegardé en
+local sur l'appareil) — voir les instructions d'installation en tête de `Code.gs`. Les
+colonnes envoyées (en-tête à renseigner sur la ligne 1 du tableur) :
 
 ```
-Eleve | Classe | Date | Mode | Numero | Resultat | Zone | Type de service
-| Trajectoire | Ligne de fond mordue | Qualite du lancer | Qualite de la reception
+Eleve | Classe | Date | Mode | Nombre de services | Zone(s) visee(s)
+| Postes receptionneurs | Services dans la zone visee
 ```
+
+Les zones à travailler, choisies obligatoirement à la création de la série, **sont**
+l'objectif de la séance (ex. toutes les zones = mettre la balle "in", les 3 zones avant =
+services courts...) ; la dernière colonne compte combien de services sont tombés dans
+cette ou ces zones, sur le nombre total de services de la série.
 
 ## Utilisation rapide
 
@@ -141,10 +147,12 @@ Le bouton **Charger une démonstration** remplit deux séries fictives de 10 ser
 
 ### Zone(s) à travailler
 
-À la création d'une série, on peut choisir une ou plusieurs zones à viser (Piscine
-comprise). Pendant la saisie, un service qui atterrit dans le terrain mais hors de ces
-zones choisies s'affiche en rouge (comme un service raté), en aide visuelle immédiate —
-sans jamais changer le résultat réellement enregistré dans les statistiques.
+À la création d'une série, il faut choisir au moins une zone à viser (Piscine comprise) :
+c'est ce choix qui définit l'objectif de la séance (ex. toutes les zones = mettre la balle
+"in", les 3 zones avant = services courts...), rappelé sur le bilan. Pendant la saisie, un
+service qui atterrit dans le terrain mais hors de ces zones choisies s'affiche en rouge
+(comme un service raté), en aide visuelle immédiate — sans jamais changer le résultat
+réellement enregistré dans les statistiques.
 
 ## Architecture
 

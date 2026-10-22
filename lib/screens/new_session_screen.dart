@@ -45,7 +45,8 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
 
   String? get _nameError => validateName(_nameController.text);
 
-  bool get _canStart => _nameController.text.trim().isNotEmpty && _nameError == null && _className != null;
+  bool get _canStart =>
+      _nameController.text.trim().isNotEmpty && _nameError == null && _className != null && _targetZones.isNotEmpty;
 
   void _start() {
     final student = Student(
@@ -133,8 +134,8 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
                 const Text('Zone(s) à travailler', style: TextStyle(fontWeight: FontWeight.w700)),
                 const SizedBox(height: 4),
                 const Text(
-                  'Touche une ou plusieurs zones du terrain pour que l\'élève s\'entraîne à viser précisément '
-                  'ces zones pendant la série. Laisse vide pour un entraînement libre.',
+                  'Touche au moins une zone du terrain : c\'est l\'objectif de la série (ex. toutes les zones = '
+                  'mettre la balle "in", les 3 zones avant = services courts...).',
                   style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                 ),
                 const SizedBox(height: 12),
@@ -152,9 +153,12 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
                     Expanded(
                       child: Text(
                         _targetZones.isEmpty
-                            ? 'Entraînement libre (toutes les zones)'
+                            ? 'Aucune zone choisie — touche le terrain ci-dessus.'
                             : 'Zone(s) choisie(s) : ${(_targetZones.toList()..sort()).map(CourtZones.label).join(', ')}',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: _targetZones.isEmpty ? AppColors.error : null,
+                        ),
                       ),
                     ),
                     if (_targetZones.isNotEmpty)

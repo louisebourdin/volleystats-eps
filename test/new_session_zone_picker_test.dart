@@ -27,8 +27,8 @@ void main() {
     );
     await tester.pump();
 
-    // Aucune zone choisie au départ.
-    expect(find.text('Entraînement libre (toutes les zones)'), findsOneWidget);
+    // Aucune zone choisie au départ : le choix d'une zone est obligatoire.
+    expect(find.text('Aucune zone choisie — touche le terrain ci-dessus.'), findsOneWidget);
 
     // Tape au centre du terrain (colonne du milieu, ligne avant) : zone 3.
     final court = find.byType(VolleyCourtWidget);
@@ -39,7 +39,7 @@ void main() {
     await tester.pump();
 
     // Le texte doit apparaître sur UNE seule ligne lisible, pas éclaté verticalement.
-    expect(find.text('Entraînement libre (toutes les zones)'), findsNothing);
+    expect(find.text('Aucune zone choisie — touche le terrain ci-dessus.'), findsNothing);
     expect(find.textContaining('Zone(s) choisie(s)'), findsOneWidget);
     expect(find.text('Tout effacer'), findsOneWidget);
 
