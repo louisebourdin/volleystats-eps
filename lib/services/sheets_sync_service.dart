@@ -15,14 +15,14 @@ import '../utils/french_date.dart';
 class SheetsSyncService {
   /// En-têtes à renseigner sur la ligne 1 du tableur (voir aussi le README).
   static const columns = [
-    'Eleve',
-    'Classe',
     'Date',
-    'Mode',
+    'Classe',
+    'Eleve',
     'Nombre de services',
-    'Zone(s) visee(s)',
-    'Postes receptionneurs',
+    'Objectif (zones)',
+    'Mode',
     'Services dans la zone visee',
+    'Ace ou bonne reception',
   ];
 
   /// Nettoie l'URL collée : retire les espaces et le segment `/u/<n>/` que
@@ -36,20 +36,22 @@ class SheetsSyncService {
   static List<String> summaryRow(Session session) {
     final targetZoneLabels =
         session.targetZones.isEmpty ? '' : (session.targetZones.toList()..sort()).map(CourtZones.label).join(', ');
-    final receptionLabels =
-        session.receptionZones.isEmpty ? '' : (session.receptionZones.toList()..sort()).map(CourtZones.label).join(', ');
     final hits =
         session.serves.where((s) => s.result == ServeResult.inCourt && session.targetZones.contains(s.zone)).length;
+    final aceCount = session.serves.where((s) => s.receptionQuality == ReceptionQuality.ace).length;
+    final bonneCount = session.serves.where((s) => s.receptionQuality == ReceptionQuality.bonne).length;
+    final receptionSummary =
+        session.mode == SessionMode.avecReception ? '$aceCount Ace / $bonneCount Bonne réception' : '';
 
     return [
-      session.student.name,
-      session.student.className,
       formatShortFrenchDate(session.date),
-      session.mode.label,
+      session.student.className,
+      session.student.name,
       session.serves.length.toString(),
       targetZoneLabels,
-      receptionLabels,
+      session.mode.label,
       '$hits / ${session.serves.length}',
+      receptionSummary,
     ];
   }
 

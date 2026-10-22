@@ -118,14 +118,16 @@ local sur l'appareil) — voir les instructions d'installation en tête de `Code
 colonnes envoyées (en-tête à renseigner sur la ligne 1 du tableur) :
 
 ```
-Eleve | Classe | Date | Mode | Nombre de services | Zone(s) visee(s)
-| Postes receptionneurs | Services dans la zone visee
+Date | Classe | Eleve | Nombre de services | Objectif (zones) | Mode
+| Services dans la zone visee | Ace ou bonne reception
 ```
 
 Les zones à travailler, choisies obligatoirement à la création de la série, **sont**
 l'objectif de la séance (ex. toutes les zones = mettre la balle "in", les 3 zones avant =
-services courts...) ; la dernière colonne compte combien de services sont tombés dans
-cette ou ces zones, sur le nombre total de services de la série.
+services courts...) ; "Services dans la zone visee" compte combien de services sont
+tombés dans cette ou ces zones, sur le nombre total de services de la série. La dernière
+colonne ("Ace ou bonne reception") reste vide en mode "sans réception" ; en mode "avec
+réception", elle résume le nombre de chaque qualité de réception relevée sur la série.
 
 ## Utilisation rapide
 
