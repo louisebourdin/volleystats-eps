@@ -39,10 +39,32 @@ class SheetsSyncService {
   static String _classNumber(String className) =>
       RegExp(r'(\d+)$').firstMatch(className)?.group(1) ?? className;
 
+  static bool _exactly(Set<String> zones, List<String> pattern) =>
+      zones.length == pattern.length && pattern.every(zones.contains);
+
+  /// Nomme l'objectif quand les zones choisies correspondent à un schéma
+  /// connu (zones avant = services courts, zones arrière = services longs,
+  /// les 6 zones = tout le terrain) ; sinon, liste les zones telles quelles.
+  static String _objectiveLabel(List<String> targetZones) {
+    if (targetZones.isEmpty) return '';
+    final zones = targetZones.toSet();
+    const allCourtZones = [
+      CourtZones.zone1,
+      CourtZones.zone2,
+      CourtZones.zone3,
+      CourtZones.zone4,
+      CourtZones.zone5,
+      CourtZones.zone6,
+    ];
+    if (allCourtZones.every(zones.contains)) return 'Tout le terrain';
+    if (_exactly(zones, CourtZones.shortZones)) return 'Services courts';
+    if (_exactly(zones, CourtZones.longZones)) return 'Services longs';
+    return (targetZones.toList()..sort()).map(CourtZones.label).join(', ');
+  }
+
   /// La ligne de résumé envoyée pour [session] (ordre : voir [columns]).
   static List<String> summaryRow(Session session) {
-    final targetZoneLabels =
-        session.targetZones.isEmpty ? '' : (session.targetZones.toList()..sort()).map(CourtZones.label).join(', ');
+    final objectiveLabel = _objectiveLabel(session.targetZones);
     final hits =
         session.serves.where((s) => s.result == ServeResult.inCourt && session.targetZones.contains(s.zone)).length;
     final aceCount = session.serves.where((s) => s.receptionQuality == ReceptionQuality.ace).length;
@@ -55,7 +77,7 @@ class SheetsSyncService {
       _classNumber(session.student.className),
       session.student.name,
       session.serves.length.toString(),
-      targetZoneLabels,
+      objectiveLabel,
       session.mode.label,
       '$hits / ${session.serves.length}',
       receptionSummary,

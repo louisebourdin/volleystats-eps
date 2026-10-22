@@ -28,6 +28,40 @@ void main() {
     expect(row[7], '0 Ace / 0 Bonne réception');
   });
 
+  test('reconnaît les 3 zones avant comme "Services courts"', () {
+    final session = DemoDataService.buildDemoSession().copyWith(
+      targetZones: [CourtZones.zone4, CourtZones.zone2, CourtZones.zone3], // ordre quelconque
+    );
+    expect(SheetsSyncService.summaryRow(session)[4], 'Services courts');
+  });
+
+  test('reconnaît les 3 zones arrière comme "Services longs"', () {
+    final session = DemoDataService.buildDemoSession().copyWith(
+      targetZones: [CourtZones.zone1, CourtZones.zone5, CourtZones.zone6],
+    );
+    expect(SheetsSyncService.summaryRow(session)[4], 'Services longs');
+  });
+
+  test('reconnaît les 6 zones (Piscine ou non) comme "Tout le terrain"', () {
+    final session = DemoDataService.buildDemoSession().copyWith(
+      targetZones: [
+        CourtZones.zone1,
+        CourtZones.zone2,
+        CourtZones.zone3,
+        CourtZones.zone4,
+        CourtZones.zone5,
+        CourtZones.zone6,
+        CourtZones.piscine,
+      ],
+    );
+    expect(SheetsSyncService.summaryRow(session)[4], 'Tout le terrain');
+  });
+
+  test('liste les zones telles quelles pour une combinaison non reconnue', () {
+    final session = DemoDataService.buildDemoSession().copyWith(targetZones: [CourtZones.zone2, CourtZones.zone5]);
+    expect(SheetsSyncService.summaryRow(session)[4], 'Zone 2, Zone 5');
+  });
+
   test('la colonne réception reste vide en mode sans réception', () {
     final session = DemoDataService.buildDemoSession().copyWith(targetZones: [CourtZones.zone5]);
 
