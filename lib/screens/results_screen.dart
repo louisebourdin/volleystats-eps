@@ -459,10 +459,10 @@ class _StudentReflectionState extends State<_StudentReflection> {
 
 /// Rappelle, en tête du bilan, ce que l'élève avait pour objectif en
 /// démarrant la série : le choix des zones à travailler définit lui-même cet
-/// objectif. Les 6 zones choisies s'affichent comme "Tout le terrain" ;
-/// toute autre combinaison liste les zones telles quelles, sans autre
-/// interprétation (pas de "services courts/longs" ici, contrairement à
-/// l'export Google Sheets).
+/// objectif (toutes les zones = "Tout le terrain", les 3 zones avant =
+/// "Services courts", les 3 zones arrière = "Services longs" — voir
+/// [CourtZones.objectiveLabel], utilisé aussi à la création de série et dans
+/// l'export Google Sheets pour rester cohérent partout).
 class _ObjectiveCard extends StatelessWidget {
   final Session session;
 
@@ -471,11 +471,7 @@ class _ObjectiveCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasZones = session.hasTargetZones;
-    final zoneLabels = !hasZones
-        ? 'Non renseigné'
-        : CourtZones.coversWholeCourt(session.targetZones)
-            ? 'Tout le terrain'
-            : (session.targetZones.toList()..sort()).map(CourtZones.label).join(', ');
+    final zoneLabels = hasZones ? CourtZones.objectiveLabel(session.targetZones) : 'Non renseigné';
     final hits = session.serves
         .where((s) => s.result == ServeResult.inCourt && session.targetZones.contains(s.zone))
         .length;

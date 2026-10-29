@@ -154,7 +154,7 @@ class _NewSessionScreenState extends ConsumerState<NewSessionScreen> {
                       child: Text(
                         _targetZones.isEmpty
                             ? 'Aucune zone choisie — touche le terrain ci-dessus.'
-                            : 'Zone(s) choisie(s) : ${(_targetZones.toList()..sort()).map(CourtZones.label).join(', ')}',
+                            : 'Zone(s) choisie(s) : ${CourtZones.objectiveLabel(_targetZones)}',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: _targetZones.isEmpty ? AppColors.error : null,

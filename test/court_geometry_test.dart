@@ -65,6 +65,36 @@ void main() {
     });
   });
 
+  group('CourtGeometry.resultForPoint — tolérance sur les lignes extérieures', () {
+    // Comme en vrai volley, une balle qui touche la ligne de côté ou de fond
+    // reste IN : un appui juste à l'extérieur de ces lignes doit encore
+    // compter comme dans le terrain, rattaché à la zone la plus proche.
+    test('juste à l\'extérieur de la ligne de côté droite reste IN, dans zone 1', () {
+      final y = CourtGeometry.courtBottom - 0.02; // milieu de la rangée arrière
+      final result = CourtGeometry.resultForPoint(Offset(CourtGeometry.courtRight + 0.01, y));
+      expect(result.result, ServeResult.inCourt);
+      expect(result.zone, CourtZones.zone1);
+    });
+
+    test('juste à l\'extérieur de la ligne de côté gauche reste IN, dans zone 4', () {
+      final y = CourtGeometry.courtTop + 0.02; // milieu de la rangée avant
+      final result = CourtGeometry.resultForPoint(Offset(CourtGeometry.courtLeft - 0.01, y));
+      expect(result.result, ServeResult.inCourt);
+      expect(result.zone, CourtZones.zone4);
+    });
+
+    test('juste à l\'extérieur de la ligne de fond reste IN', () {
+      final result = CourtGeometry.resultForPoint(Offset(CourtGeometry.midX, CourtGeometry.courtBottom + 0.01));
+      expect(result.result, ServeResult.inCourt);
+    });
+
+    test('au-delà de la tolérance, c\'est bien OUT', () {
+      final y = CourtGeometry.courtBottom - 0.02;
+      final result = CourtGeometry.resultForPoint(Offset(CourtGeometry.courtRight + 0.05, y));
+      expect(result.result, ServeResult.out);
+    });
+  });
+
   group('CourtGeometry.rectForZone — inter zone', () {
     // Régression : le terrain affiché pendant la saisie disparaissait
     // (exception) dès qu'un service tombait sur une ligne, car rectForZone
@@ -94,6 +124,42 @@ void main() {
     test('label() donne un texte lisible, pas l\'identifiant brut', () {
       expect(CourtZones.label(CourtZones.interZone34), 'Inter zone 3-4');
       expect(CourtZones.label(CourtZones.interZone34), isNot(contains('_')));
+    });
+  });
+
+  group('CourtZones.objectiveLabel', () {
+    test('les 6 zones (Piscine comprise ou non) donnent "Tout le terrain"', () {
+      expect(
+        CourtZones.objectiveLabel([
+          CourtZones.zone1,
+          CourtZones.zone2,
+          CourtZones.zone3,
+          CourtZones.zone4,
+          CourtZones.zone5,
+          CourtZones.zone6,
+        ]),
+        'Tout le terrain',
+      );
+      expect(
+        CourtZones.objectiveLabel([...CourtZones.shortZones, ...CourtZones.longZones, CourtZones.piscine]),
+        'Tout le terrain',
+      );
+    });
+
+    test('exactement les zones avant donne "Services courts"', () {
+      expect(CourtZones.objectiveLabel(CourtZones.shortZones), 'Services courts');
+    });
+
+    test('exactement les zones arrière donne "Services longs"', () {
+      expect(CourtZones.objectiveLabel(CourtZones.longZones), 'Services longs');
+    });
+
+    test('toute autre combinaison liste les zones', () {
+      expect(CourtZones.objectiveLabel([CourtZones.zone2, CourtZones.zone5]), 'Zone 2, Zone 5');
+    });
+
+    test('vide renvoie une chaîne vide', () {
+      expect(CourtZones.objectiveLabel(const []), '');
     });
   });
 }

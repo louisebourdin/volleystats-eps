@@ -234,7 +234,7 @@ class _TargetZonesBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labels = (zoneIds.toList()..sort()).map(CourtZones.label).join(', ');
+    final labels = CourtZones.objectiveLabel(zoneIds);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(

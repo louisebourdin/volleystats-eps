@@ -59,6 +59,12 @@ class CourtGeometry {
   /// considéré comme "sur la ligne" plutôt que dans l'une ou l'autre zone.
   static const double interZoneTolerance = 0.015;
 
+  /// Tolérance (fraction du terrain) sur les lignes de côté et de fond :
+  /// comme en vrai volley, une balle qui touche la ligne reste IN — un appui
+  /// juste à l'extérieur de ces lignes compte donc encore comme dans le
+  /// terrain. Ne s'applique jamais à la ligne du filet (déjà sa propre bande).
+  static const double outerLineTolerance = 0.015;
+
   /// Zone "inter zone" si [x] tombe sur l'une des deux lignes verticales qui
   /// séparent les zones d'une même rangée (jamais la ligne avant/arrière).
   static String? _interZoneForColumnBoundary(int row, double x) {
@@ -130,27 +136,33 @@ class CourtGeometry {
       return TapZoneResult(result: ServeResult.net, zone: null, direction: directionForX(x));
     }
 
-    // Intérieur du terrain.
+    // Intérieur du terrain — avec une tolérance sur les lignes de côté et de
+    // fond (jamais sur la ligne du filet, déjà couverte par sa propre bande).
     final court = courtRect;
-    if (x >= court.left && x <= court.right && y >= court.top && y <= court.bottom) {
+    final touchesCourt = x >= court.left - outerLineTolerance &&
+        x <= court.right + outerLineTolerance &&
+        y >= court.top &&
+        y <= court.bottom + outerLineTolerance;
+    if (touchesCourt) {
+      // Un appui juste hors des lignes (toléré ci-dessus) se rattache à la
+      // zone la plus proche : on ramène le point dans les bornes exactes
+      // avant de déterminer piscine / inter zone / zone.
+      final cx = x.clamp(court.left, court.right);
+      final cy = y.clamp(court.top, court.bottom);
       // Zone "Piscine" en incrustation centrale : prioritaire sur la grille.
-      if ((x - midX).abs() <= piscineHalfWidth && (y - midY).abs() <= piscineHalfHeight) {
-        return const TapZoneResult(
-          result: ServeResult.inCourt,
-          zone: CourtZones.piscine,
-          direction: ServeDirection.centre,
-        );
+      if ((cx - midX).abs() <= piscineHalfWidth && (cy - midY).abs() <= piscineHalfHeight) {
+        return TapZoneResult(result: ServeResult.inCourt, zone: CourtZones.piscine, direction: directionForX(cx));
       }
-      final row = y < midY ? 0 : 1;
+      final row = cy < midY ? 0 : 1;
       if (includeInterZones) {
-        final interZone = _interZoneForColumnBoundary(row, x);
+        final interZone = _interZoneForColumnBoundary(row, cx);
         if (interZone != null) {
-          return TapZoneResult(result: ServeResult.inCourt, zone: interZone, direction: directionForX(x));
+          return TapZoneResult(result: ServeResult.inCourt, zone: interZone, direction: directionForX(cx));
         }
       }
-      final col = (((x - courtLeft) / colWidth).floor()).clamp(0, 2);
+      final col = (((cx - courtLeft) / colWidth).floor()).clamp(0, 2);
       final zone = _grid[row][col];
-      return TapZoneResult(result: ServeResult.inCourt, zone: zone, direction: directionForX(x));
+      return TapZoneResult(result: ServeResult.inCourt, zone: zone, direction: directionForX(cx));
     }
 
     // Tout le reste (avant le filet, au-delà des lignes de fond/côté) = OUT.

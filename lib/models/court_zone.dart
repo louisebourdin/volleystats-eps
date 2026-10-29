@@ -81,4 +81,22 @@ class CourtZones {
     if (zoneId == piscine) return 'Piscine';
     return zoneId.replaceAll('zone', '');
   }
+
+  static bool _exactlyMatches(Set<String> zones, List<String> pattern) =>
+      zones.length == pattern.length && pattern.every(zones.contains);
+
+  /// Nomme un ensemble de zones choisies quand il correspond à un schéma
+  /// connu — toutes les 6 zones = "Tout le terrain", les 3 zones avant =
+  /// "Services courts", les 3 zones arrière = "Services longs" — sinon liste
+  /// les zones telles quelles. Utilisé partout où l'objectif de zone(s)
+  /// d'une séance est résumé (création de série, bilan, export Sheets) pour
+  /// rester cohérent.
+  static String objectiveLabel(Iterable<String> zones) {
+    if (zones.isEmpty) return '';
+    final set = zones.toSet();
+    if (coversWholeCourt(set)) return 'Tout le terrain';
+    if (_exactlyMatches(set, shortZones)) return 'Services courts';
+    if (_exactlyMatches(set, longZones)) return 'Services longs';
+    return (zones.toList()..sort()).map(label).join(', ');
+  }
 }
