@@ -48,15 +48,7 @@ class SheetsSyncService {
   static String _objectiveLabel(List<String> targetZones) {
     if (targetZones.isEmpty) return '';
     final zones = targetZones.toSet();
-    const allCourtZones = [
-      CourtZones.zone1,
-      CourtZones.zone2,
-      CourtZones.zone3,
-      CourtZones.zone4,
-      CourtZones.zone5,
-      CourtZones.zone6,
-    ];
-    if (allCourtZones.every(zones.contains)) return 'Tout le terrain';
+    if (CourtZones.coversWholeCourt(zones)) return 'Tout le terrain';
     if (_exactly(zones, CourtZones.shortZones)) return 'Services courts';
     if (_exactly(zones, CourtZones.longZones)) return 'Services longs';
     return (targetZones.toList()..sort()).map(CourtZones.label).join(', ');

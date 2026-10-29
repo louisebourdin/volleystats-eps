@@ -31,6 +31,15 @@ class CourtZones {
 
   static bool isLong(String zoneId) => longZones.contains(zoneId);
 
+  /// Vrai si [zones] couvre les 6 zones du terrain (Piscine comprise ou non) :
+  /// l'objectif de la séance est alors "tout le terrain", plutôt que de
+  /// lister les 6 zones une par une.
+  static bool coversWholeCourt(Iterable<String> zones) {
+    const sixZones = [zone1, zone2, zone3, zone4, zone5, zone6];
+    final set = zones.toSet();
+    return sixZones.every(set.contains);
+  }
+
   /// Le service a atterri exactement sur la ligne entre deux zones voisines
   /// de la même rangée (jamais avant/arrière) — voir [CourtGeometry]. Jamais
   /// considérée comme une zone "visée" : informatif uniquement, notamment
