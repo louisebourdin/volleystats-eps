@@ -64,4 +64,36 @@ void main() {
       expect(CourtZones.isInterZone(result.zone ?? ''), isFalse);
     });
   });
+
+  group('CourtGeometry.rectForZone — inter zone', () {
+    // Régression : le terrain affiché pendant la saisie disparaissait
+    // (exception) dès qu'un service tombait sur une ligne, car rectForZone
+    // ne savait dessiner que les 6 zones + la Piscine.
+    test('ne plante jamais pour une "inter zone" et couvre les deux zones voisines', () {
+      for (final interZone in CourtZones.interZones) {
+        expect(() => CourtGeometry.rectForZone(interZone), returnsNormally);
+      }
+      final rect = CourtGeometry.rectForZone(CourtZones.interZone34);
+      final rect3 = CourtGeometry.rectForZone(CourtZones.zone3);
+      final rect4 = CourtGeometry.rectForZone(CourtZones.zone4);
+      expect(rect, rect3.expandToInclude(rect4));
+    });
+  });
+
+  group('CourtZones — inter zone', () {
+    test('une "inter zone" avant est classée "Service court"', () {
+      expect(CourtZones.depthLabel(CourtZones.interZone34), 'Service court');
+      expect(CourtZones.depthLabel(CourtZones.interZone23), 'Service court');
+    });
+
+    test('une "inter zone" arrière est classée "Service long"', () {
+      expect(CourtZones.depthLabel(CourtZones.interZone56), 'Service long');
+      expect(CourtZones.depthLabel(CourtZones.interZone16), 'Service long');
+    });
+
+    test('label() donne un texte lisible, pas l\'identifiant brut', () {
+      expect(CourtZones.label(CourtZones.interZone34), 'Inter zone 3-4');
+      expect(CourtZones.label(CourtZones.interZone34), isNot(contains('_')));
+    });
+  });
 }

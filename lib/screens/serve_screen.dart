@@ -96,8 +96,11 @@ class ServeScreen extends ConsumerWidget {
                             final targetZones = session.targetZones.toSet();
                             // Service IN mais hors de la zone visée pour la séance : traité visuellement
                             // comme un raté (rouge), même si le résultat réel reste IN dans les stats.
+                            // Un service "inter zone" (sur la ligne) n'est jamais traité comme un raté.
                             final missedTargetZone = draft.result == ServeResult.inCourt &&
                                 targetZones.isNotEmpty &&
+                                draft.zone != null &&
+                                !CourtZones.isInterZone(draft.zone!) &&
                                 !targetZones.contains(draft.zone);
                             final court = VolleyCourtWidget(
                               onTap: (result, x, y) => ref.read(sessionProvider.notifier).setImpact(result, x, y),
@@ -270,7 +273,7 @@ class _ConfirmationView extends StatelessWidget {
       case ServeResult.inCourt:
         color = AppColors.success;
         icon = Icons.check_rounded;
-        resultLabel = serve.zone == 'piscine' ? 'IN — Piscine' : 'IN — Zone ${serve.zone?.replaceAll('zone', '')}';
+        resultLabel = 'IN — ${serve.zone != null ? CourtZones.label(serve.zone!) : ''}';
         break;
       case ServeResult.out:
         color = AppColors.error;

@@ -27,9 +27,10 @@ class CourtZones {
   /// Zones proches de la ligne de fond : un service qui y atterrit est un service "long".
   static const List<String> longZones = [zone5, zone6, zone1];
 
-  static bool isShort(String zoneId) => shortZones.contains(zoneId);
+  static bool isShort(String zoneId) =>
+      shortZones.contains(zoneId) || zoneId == interZone34 || zoneId == interZone23;
 
-  static bool isLong(String zoneId) => longZones.contains(zoneId);
+  static bool isLong(String zoneId) => longZones.contains(zoneId) || zoneId == interZone56 || zoneId == interZone16;
 
   /// Vrai si [zones] couvre les 6 zones du terrain (Piscine comprise ou non) :
   /// l'objectif de la séance est alors "tout le terrain", plutôt que de

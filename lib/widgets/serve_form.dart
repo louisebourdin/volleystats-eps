@@ -162,9 +162,13 @@ class _ImpactStatus extends StatelessWidget {
     }
     // Zone visée choisie pour la séance, mais service tombé ailleurs : on
     // affiche ça comme un raté (rouge), même si le service reste bien "IN"
-    // dans les statistiques — c'est juste une aide visuelle en direct.
+    // dans les statistiques — c'est juste une aide visuelle en direct. Un
+    // service "inter zone" (sur la ligne) n'est jamais traité comme un raté :
+    // il ne compte simplement pas pour l'objectif, sans alerte visuelle.
     final missedTargetZone = draft.result == ServeResult.inCourt &&
         targetZones.isNotEmpty &&
+        draft.zone != null &&
+        !CourtZones.isInterZone(draft.zone!) &&
         !targetZones.contains(draft.zone);
 
     final Color color;
@@ -173,14 +177,14 @@ class _ImpactStatus extends StatelessWidget {
     if (missedTargetZone) {
       color = AppColors.error;
       icon = Icons.cancel_rounded;
-      text = 'IN — ${draft.zone == 'piscine' ? 'Piscine' : 'Zone ${draft.zone?.replaceAll('zone', '')}'} (hors zone visée)';
+      text = 'IN — ${CourtZones.label(draft.zone!)} (hors zone visée)';
     } else {
       switch (draft.result!) {
         case ServeResult.inCourt:
           color = AppColors.success;
           icon = Icons.check_circle_rounded;
           final depthLabel = draft.zone != null ? CourtZones.depthLabel(draft.zone!) : null;
-          text = 'IN — ${draft.zone == 'piscine' ? 'Piscine' : 'Zone ${draft.zone?.replaceAll('zone', '')}'}'
+          text = 'IN — ${draft.zone != null ? CourtZones.label(draft.zone!) : ''}'
               '${depthLabel != null ? ' ($depthLabel)' : ''}';
           break;
         case ServeResult.out:

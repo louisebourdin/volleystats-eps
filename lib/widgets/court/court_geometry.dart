@@ -73,8 +73,19 @@ class CourtGeometry {
     return null;
   }
 
+  /// Les deux zones voisines que chaque "inter zone" chevauche (voir
+  /// [CourtZones.interZones]).
+  static const Map<String, (String, String)> _interZoneComponents = {
+    CourtZones.interZone34: (CourtZones.zone3, CourtZones.zone4),
+    CourtZones.interZone23: (CourtZones.zone2, CourtZones.zone3),
+    CourtZones.interZone56: (CourtZones.zone5, CourtZones.zone6),
+    CourtZones.interZone16: (CourtZones.zone1, CourtZones.zone6),
+  };
+
   /// Rectangle (fractions 0..1) occupé par une zone donnée — utile pour
-  /// dessiner ses bordures et centrer son numéro.
+  /// dessiner ses bordures et centrer son numéro. Pour une "inter zone", le
+  /// rectangle couvre les deux zones voisines qu'elle chevauche (pas de
+  /// rectangle propre, puisque c'est justement la ligne entre les deux).
   static Rect rectForZone(String zoneId) {
     if (zoneId == CourtZones.piscine) {
       return Rect.fromLTRB(
@@ -83,6 +94,10 @@ class CourtGeometry {
         midX + piscineHalfWidth,
         midY + piscineHalfHeight,
       );
+    }
+    final pair = _interZoneComponents[zoneId];
+    if (pair != null) {
+      return rectForZone(pair.$1).expandToInclude(rectForZone(pair.$2));
     }
     final rc = _zoneRowCol[zoneId]!;
     final left = courtLeft + rc[1] * colWidth;
