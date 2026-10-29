@@ -69,8 +69,16 @@ class ServeAnalysis {
 
   double get successRatePercent => total == 0 ? 0 : (inCount / total) * 100;
 
-  List<MapEntry<String, int>> get zoneCountsOrdered =>
-      CourtZones.orderedForStats.map((z) => MapEntry(z, zoneCounts[z] ?? 0)).toList();
+  /// Les 6 zones + Piscine, toujours dans le même ordre, puis — seulement si
+  /// elles ont été touchées au moins une fois — les "inter zone" (ligne entre
+  /// deux zones voisines) : pas de ligne à 0 en permanence pour ça.
+  List<MapEntry<String, int>> get zoneCountsOrdered => _orderedWithExtras(zoneCounts);
+
+  List<MapEntry<String, int>> _orderedWithExtras(Map<String, int> counts) {
+    final standard = CourtZones.orderedForStats.map((z) => MapEntry(z, counts[z] ?? 0));
+    final extraKeys = counts.keys.where((z) => !CourtZones.orderedForStats.contains(z)).toList()..sort();
+    return [...standard, ...extraKeys.map((z) => MapEntry(z, counts[z]!))];
+  }
 
   /// Nombre de services IN dans une zone courte (2, 3, 4).
   int get shortServeCount =>
@@ -95,7 +103,7 @@ class ServeAnalysis {
   double get dangerousServeRate =>
       receptionRecordedCount == 0 ? 0 : dangerousServeCount / receptionRecordedCount * 100;
 
-  /// Zones où atterrissent les aces, dans l'ordre d'affichage standard.
-  List<MapEntry<String, int>> get aceZoneCountsOrdered =>
-      CourtZones.orderedForStats.map((z) => MapEntry(z, aceZoneCounts[z] ?? 0)).toList();
+  /// Zones où atterrissent les aces, dans l'ordre d'affichage standard (plus
+  /// les "inter zone" concernées, le cas échéant — voir [zoneCountsOrdered]).
+  List<MapEntry<String, int>> get aceZoneCountsOrdered => _orderedWithExtras(aceZoneCounts);
 }

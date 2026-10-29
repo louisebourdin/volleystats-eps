@@ -57,7 +57,7 @@ class VolleyCourtWidget extends StatelessWidget {
               final local = details.localPosition;
               final x = (local.dx / size.width).clamp(0.0, 1.0);
               final y = (local.dy / size.height).clamp(0.0, 1.0);
-              final result = CourtGeometry.resultForPoint(Offset(x, y));
+              final result = CourtGeometry.resultForPoint(Offset(x, y), includeInterZones: false);
               if (result.result == ServeResult.inCourt &&
                   result.zone != null &&
                   !(excludePiscineFromPicker && result.zone == CourtZones.piscine)) {

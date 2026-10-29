@@ -54,6 +54,25 @@ class CourtGeometry {
     [CourtZones.zone5, CourtZones.zone6, CourtZones.zone1],
   ];
 
+  /// Demi-largeur (fraction du terrain) de la bande autour d'une ligne de
+  /// séparation entre deux zones voisines, dans laquelle un appui est
+  /// considéré comme "sur la ligne" plutôt que dans l'une ou l'autre zone.
+  static const double interZoneTolerance = 0.015;
+
+  /// Zone "inter zone" si [x] tombe sur l'une des deux lignes verticales qui
+  /// séparent les zones d'une même rangée (jamais la ligne avant/arrière).
+  static String? _interZoneForColumnBoundary(int row, double x) {
+    final leftBoundary = courtLeft + colWidth;
+    final rightBoundary = courtLeft + 2 * colWidth;
+    if ((x - leftBoundary).abs() <= interZoneTolerance) {
+      return row == 0 ? CourtZones.interZone34 : CourtZones.interZone56;
+    }
+    if ((x - rightBoundary).abs() <= interZoneTolerance) {
+      return row == 0 ? CourtZones.interZone23 : CourtZones.interZone16;
+    }
+    return null;
+  }
+
   /// Rectangle (fractions 0..1) occupé par une zone donnée — utile pour
   /// dessiner ses bordures et centrer son numéro.
   static Rect rectForZone(String zoneId) {
@@ -83,7 +102,10 @@ class CourtGeometry {
 
   /// Détermine résultat / zone / direction à partir d'un point normalisé.
   /// Le point peut légèrement sortir de [0, 1] (zone OUT autour du terrain).
-  static TapZoneResult resultForPoint(Offset p) {
+  /// [includeInterZones] détecte les appuis sur une ligne entre deux zones
+  /// voisines (voir [CourtZones.interZones]) ; désactivé en mode sélection
+  /// de zone (l'élève y choisit toujours une zone précise, jamais une ligne).
+  static TapZoneResult resultForPoint(Offset p, {bool includeInterZones = true}) {
     final x = p.dx;
     final y = p.dy;
 
@@ -104,8 +126,14 @@ class CourtGeometry {
           direction: ServeDirection.centre,
         );
       }
-      final col = (((x - courtLeft) / colWidth).floor()).clamp(0, 2);
       final row = y < midY ? 0 : 1;
+      if (includeInterZones) {
+        final interZone = _interZoneForColumnBoundary(row, x);
+        if (interZone != null) {
+          return TapZoneResult(result: ServeResult.inCourt, zone: interZone, direction: directionForX(x));
+        }
+      }
+      final col = (((x - courtLeft) / colWidth).floor()).clamp(0, 2);
       final zone = _grid[row][col];
       return TapZoneResult(result: ServeResult.inCourt, zone: zone, direction: directionForX(x));
     }

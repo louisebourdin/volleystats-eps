@@ -165,6 +165,16 @@ service qui atterrit dans le terrain mais hors de ces zones choisies s'affiche e
 (comme un service raté), en aide visuelle immédiate — sans jamais changer le résultat
 réellement enregistré dans les statistiques.
 
+### Appui sur une ligne entre deux zones ("inter zone")
+
+Pendant la saisie d'un service (jamais pendant le choix des zones à travailler), un appui
+tout près de la ligne qui sépare deux zones voisines **de la même rangée** (zone 3-4,
+zone 2-3 côté filet ; zone 5-6, zone 6-1 côté fond — jamais entre l'avant et l'arrière)
+enregistre "Inter zone 3-4", "Inter zone 2-3", etc. au lieu de forcer arbitrairement l'une
+des deux. C'est purement informatif dans les statistiques (notamment pour repérer
+l'origine des aces) : un service "inter zone" ne compte jamais comme tombé dans la zone
+visée de la séance.
+
 ## Architecture
 
 ```
