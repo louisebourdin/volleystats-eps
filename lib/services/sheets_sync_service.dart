@@ -21,6 +21,8 @@ class SheetsSyncService {
     'Nombre de services',
     'Objectif (zones)',
     'Mode',
+    'Trajectoire dominante',
+    'Mordus',
     'Services dans la zone visee',
     'Ace ou bonne reception',
   ];
@@ -39,6 +41,14 @@ class SheetsSyncService {
   static String _classNumber(String className) =>
       RegExp(r'(\d+)$').firstMatch(className)?.group(1) ?? className;
 
+  /// Trajectoire la plus utilisée dans la série ; "Mixte" en cas d'égalité.
+  static String _dominantTrajectory(Session session) {
+    final tenduCount = session.serves.where((s) => s.trajectory == ServeTrajectory.tendue).length;
+    final clocheCount = session.serves.length - tenduCount;
+    if (tenduCount == clocheCount) return 'Mixte';
+    return tenduCount > clocheCount ? ServeTrajectory.tendue.label : ServeTrajectory.cloche.label;
+  }
+
   /// La ligne de résumé envoyée pour [session] (ordre : voir [columns]).
   static List<String> summaryRow(Session session) {
     final objectiveLabel = CourtZones.objectiveLabel(session.targetZones);
@@ -48,6 +58,7 @@ class SheetsSyncService {
     final bonneCount = session.serves.where((s) => s.receptionQuality == ReceptionQuality.bonne).length;
     final receptionSummary =
         session.mode == SessionMode.avecReception ? '$aceCount Ace / $bonneCount Bonne réception' : '';
+    final footFaultCount = session.serves.where((s) => s.footFault).length;
 
     return [
       formatShortFrenchDate(session.date),
@@ -56,6 +67,8 @@ class SheetsSyncService {
       session.serves.length.toString(),
       objectiveLabel,
       session.mode.label,
+      _dominantTrajectory(session),
+      '$footFaultCount / ${session.serves.length}',
       '$hits / ${session.serves.length}',
       receptionSummary,
     ];
