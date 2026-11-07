@@ -16,9 +16,9 @@
  *    | Trajectoire dominante | Mordus | Services dans la zone visee
  *    | Ace ou bonne reception
  *
- *    Les colonnes "Mordus" (8) et "Ace ou bonne reception" (10) sont
- *    coloriées automatiquement à l'insertion (voir _mordusColor et
- *    _receptionColor ci-dessous).
+ *    Les colonnes "Mordus" (8), "Services dans la zone visee" (9) et "Ace
+ *    ou bonne reception" (10) sont coloriées automatiquement à l'insertion
+ *    (voir _mordusColor, _zoneColor et _receptionColor ci-dessous).
  * 4. Déployer > Nouveau déploiement > type "Application Web".
  *    - Exécuter en tant que : Moi
  *    - Qui a accès : Tous les utilisateurs
@@ -33,7 +33,11 @@
 
 // Position (1-indexée) des colonnes coloriées, selon l'ordre envoyé par l'appli.
 var MORDUS_COLUMN = 8;
+var ZONE_COLUMN = 9;
 var RECEPTION_COLUMN = 10;
+
+// À partir de combien de fautes de pied la colonne Mordus passe en rouge.
+var MORDUS_ALERT_THRESHOLD = 2;
 
 var COLOR_RED = '#F4CCCC';
 var COLOR_ORANGE = '#FCE5CD';
@@ -59,6 +63,8 @@ function doPost(e) {
       var rowNum = startRow + i;
       var mordusColor = _mordusColor(rows[i][MORDUS_COLUMN - 1]);
       if (mordusColor) sheet.getRange(rowNum, MORDUS_COLUMN).setBackground(mordusColor);
+      var zoneColor = _zoneColor(rows[i][ZONE_COLUMN - 1]);
+      if (zoneColor) sheet.getRange(rowNum, ZONE_COLUMN).setBackground(zoneColor);
       var receptionColor = _receptionColor(rows[i][RECEPTION_COLUMN - 1]);
       if (receptionColor) sheet.getRange(rowNum, RECEPTION_COLUMN).setBackground(receptionColor);
     }
@@ -69,18 +75,27 @@ function doPost(e) {
   }
 }
 
-// "3 / 10" -> plus de la moitié de mordus = rouge, exactement la moitié =
-// orange, moins de la moitié = vert. Valeur non reconnue -> pas de couleur.
+// "3 / 10" -> rouge dès MORDUS_ALERT_THRESHOLD fautes de pied ou plus dans
+// la série, vert en dessous. Valeur non reconnue -> pas de couleur.
 function _mordusColor(text) {
   var m = /^(\d+)\s*\/\s*(\d+)$/.exec(String(text || ''));
   if (!m) return null;
   var faults = parseInt(m[1], 10);
+  return faults >= MORDUS_ALERT_THRESHOLD ? COLOR_RED : COLOR_GREEN;
+}
+
+// "8 / 10" -> plus de la moitié de la série dans la zone visée = vert,
+// exactement la moitié = orange, moins de la moitié = rouge.
+function _zoneColor(text) {
+  var m = /^(\d+)\s*\/\s*(\d+)$/.exec(String(text || ''));
+  if (!m) return null;
+  var hits = parseInt(m[1], 10);
   var total = parseInt(m[2], 10);
   if (total === 0) return null;
-  var ratio = faults / total;
-  if (ratio > 0.5) return COLOR_RED;
+  var ratio = hits / total;
+  if (ratio > 0.5) return COLOR_GREEN;
   if (ratio === 0.5) return COLOR_ORANGE;
-  return COLOR_GREEN;
+  return COLOR_RED;
 }
 
 // "2 Ace / 1 Bonne réception" -> plus d'ace que de bonne réception = vert,

@@ -141,12 +141,13 @@ le nombre total de services de la série. La dernière colonne ("Ace ou bonne re
 reste vide en mode "sans réception" ; en mode "avec réception", elle résume le nombre de
 chaque qualité de réception relevée sur la série.
 
-Les colonnes "Mordus" et "Ace ou bonne reception" sont coloriées automatiquement par le
-script (`Code.gs`) à l'insertion de la ligne :
+Les colonnes "Mordus", "Services dans la zone visee" et "Ace ou bonne reception" sont
+coloriées automatiquement par le script (`Code.gs`) à l'insertion de la ligne :
 
 | Colonne | Rouge | Orange | Vert |
 |---|---|---|---|
-| Mordus | + de la moitié de la série en mordus | exactement la moitié | - de la moitié |
+| Mordus | 2 fautes de pied ou + dans la série | — | moins de 2 |
+| Services dans la zone visee | - de la moitié de la série dans la zone | exactement la moitié | + de la moitié |
 | Ace ou bonne reception | + de bonne réception que d'ace | autant des deux | + d'ace que de bonne réception |
 
 ## Utilisation rapide
