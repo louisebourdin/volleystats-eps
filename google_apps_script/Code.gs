@@ -1,6 +1,8 @@
 /**
  * VolleyStats EPS — reçoit les services d'une série envoyés par le bouton
- * "Envoyer vers Google Sheets" de l'appli, et les ajoute en bas de la feuille.
+ * "Envoyer vers Google Sheets" de l'appli, et les ajoute en bas de l'onglet
+ * correspondant à la classe de l'élève (un onglet par classe, créé
+ * automatiquement au premier envoi avec les bons en-têtes).
  *
  * Installation :
  * 1. Ouvre ton Google Sheets > Extensions > Apps Script.
@@ -8,10 +10,12 @@
  *    puis colle tout le contenu de ce fichier et enregistre (Ctrl+S). Si le
  *    code est collé à l'intérieur de myFunction, Google répond
  *    "Fonction de script introuvable : doPost".
- * 3. En haut de la feuille (ligne 1), renseigne les en-têtes exactement dans
- *    cet ordre (voir aussi le README du projet). Une seule ligne est ajoutée
- *    par série envoyée (résumé, pas le détail service par service — pour ça
- *    il y a l'export CSV) :
+ * 3. Pas besoin de préparer d'en-têtes à la main : le script crée un onglet
+ *    "2nde <n>" à la volée pour chaque classe qui envoie une série, avec la
+ *    ligne d'en-tête déjà remplie (voir COLUMN_HEADERS ci-dessous, même
+ *    ordre que le README du projet). Une seule ligne est ajoutée par série
+ *    envoyée (résumé, pas le détail service par service — pour ça il y a
+ *    l'export CSV) :
  *    Date | Classe | Eleve | Nombre de services | Objectif (zones) | Mode
  *    | Trajectoire dominante | Mordus | Services dans la zone visee
  *    | Ace ou bonne reception
@@ -31,7 +35,14 @@
  * sinon l'URL continuera d'exécuter l'ancienne version du code.
  */
 
-// Position (1-indexée) des colonnes coloriées, selon l'ordre envoyé par l'appli.
+var COLUMN_HEADERS = [
+  'Date', 'Classe', 'Eleve', 'Nombre de services', 'Objectif (zones)', 'Mode',
+  'Trajectoire dominante', 'Mordus', 'Services dans la zone visee', 'Ace ou bonne reception',
+];
+
+// Position (1-indexée) des colonnes utilisées pour router et colorier, selon
+// l'ordre envoyé par l'appli (voir COLUMN_HEADERS).
+var CLASS_COLUMN = 2;
 var MORDUS_COLUMN = 8;
 var ZONE_COLUMN = 9;
 var RECEPTION_COLUMN = 10;
@@ -52,20 +63,22 @@ function doPost(e) {
       return _jsonResponse({status: 'ok', inserted: 0});
     }
 
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var startRow = sheet.getLastRow() + 1;
-    var range = sheet.getRange(startRow, 1, rows.length, rows[0].length);
-    // Texte brut : sinon Sheets convertit "2e2" (classe) en 200, notation scientifique.
-    range.setNumberFormat('@');
-    range.setValues(rows);
+    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 
     for (var i = 0; i < rows.length; i++) {
-      var rowNum = startRow + i;
-      var mordusColor = _mordusColor(rows[i][MORDUS_COLUMN - 1]);
+      var row = rows[i];
+      var sheet = _sheetForClass(spreadsheet, row[CLASS_COLUMN - 1]);
+      var rowNum = sheet.getLastRow() + 1;
+      var range = sheet.getRange(rowNum, 1, 1, row.length);
+      // Texte brut : sinon Sheets convertit "2e2" (classe) en 200, notation scientifique.
+      range.setNumberFormat('@');
+      range.setValues([row]);
+
+      var mordusColor = _mordusColor(row[MORDUS_COLUMN - 1]);
       if (mordusColor) sheet.getRange(rowNum, MORDUS_COLUMN).setBackground(mordusColor);
-      var zoneColor = _zoneColor(rows[i][ZONE_COLUMN - 1]);
+      var zoneColor = _zoneColor(row[ZONE_COLUMN - 1]);
       if (zoneColor) sheet.getRange(rowNum, ZONE_COLUMN).setBackground(zoneColor);
-      var receptionColor = _receptionColor(rows[i][RECEPTION_COLUMN - 1]);
+      var receptionColor = _receptionColor(row[RECEPTION_COLUMN - 1]);
       if (receptionColor) sheet.getRange(rowNum, RECEPTION_COLUMN).setBackground(receptionColor);
     }
 
@@ -73,6 +86,20 @@ function doPost(e) {
   } catch (err) {
     return _jsonResponse({status: 'error', message: err.message || String(err)});
   }
+}
+
+// Renvoie l'onglet "2nde <classNumber>", en le créant (avec les en-têtes)
+// s'il n'existe pas encore.
+function _sheetForClass(spreadsheet, classNumber) {
+  var name = '2nde ' + classNumber;
+  var sheet = spreadsheet.getSheetByName(name);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(name);
+    var headerRange = sheet.getRange(1, 1, 1, COLUMN_HEADERS.length);
+    headerRange.setValues([COLUMN_HEADERS]);
+    headerRange.setFontWeight('bold');
+  }
+  return sheet;
 }
 
 // "3 / 10" -> rouge dès MORDUS_ALERT_THRESHOLD fautes de pied ou plus dans

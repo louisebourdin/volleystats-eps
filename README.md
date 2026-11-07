@@ -111,11 +111,13 @@ build : `--dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`).
 
 Depuis le bilan d'une série (ou depuis l'accueil, qui propose de choisir une série de
 l'historique), le bouton **"Envoyer vers Google Sheets"** ajoute **une seule ligne résumé**
-en bas d'un tableur, via un Web App Apps Script (`google_apps_script/Code.gs`) — à la
-différence de l'export CSV, qui lui reste détaillé service par service. L'URL du Web App
-se configure une fois dans l'appli (icône réglages à côté du bouton, champ sauvegardé en
-local sur l'appareil) — voir les instructions d'installation en tête de `Code.gs`. Les
-colonnes envoyées (en-tête à renseigner sur la ligne 1 du tableur) :
+en bas de l'onglet de la classe de l'élève, via un Web App Apps Script
+(`google_apps_script/Code.gs`) — à la différence de l'export CSV, qui lui reste détaillé
+service par service. Le script crée l'onglet ("2nde \<n\>") automatiquement au premier envoi
+d'une classe, en-têtes compris : aucune préparation manuelle du tableur n'est nécessaire.
+L'URL du Web App se configure une fois dans l'appli (icône réglages à côté du bouton,
+champ sauvegardé en local sur l'appareil) — voir les instructions d'installation en tête
+de `Code.gs`. Les colonnes envoyées :
 
 ```
 Date | Classe | Eleve | Nombre de services | Objectif (zones) | Mode
