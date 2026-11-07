@@ -119,7 +119,7 @@ colonnes envoyées (en-tête à renseigner sur la ligne 1 du tableur) :
 
 ```
 Date | Classe | Eleve | Nombre de services | Objectif (zones) | Mode
-| Services dans la zone visee | Ace ou bonne reception
+| Trajectoire dominante | Mordus | Services dans la zone visee | Ace ou bonne reception
 ```
 
 L'appli ne servant que des classes de seconde, la colonne "Classe" ne garde que le numéro
@@ -133,10 +133,21 @@ schémas de zones et les nomme directement, plutôt que de lister les zones une 
 | Les 6 zones (Piscine comprise ou non) | Tout le terrain |
 | Toute autre combinaison | Liste des zones telle quelle |
 
-"Services dans la zone visee" compte combien de services sont tombés dans la ou les zones
-choisies, sur le nombre total de services de la série. La dernière colonne ("Ace ou bonne
-reception") reste vide en mode "sans réception" ; en mode "avec
-réception", elle résume le nombre de chaque qualité de réception relevée sur la série.
+"Trajectoire dominante" indique la trajectoire (Tendu/Cloche) la plus utilisée sur la
+série ("Mixte" en cas d'égalité). "Mordus" compte combien de services ont une faute de
+pied (ligne de fond mordue), sur le nombre total de services de la série. "Services dans
+la zone visee" compte combien de services sont tombés dans la ou les zones choisies, sur
+le nombre total de services de la série. La dernière colonne ("Ace ou bonne reception")
+reste vide en mode "sans réception" ; en mode "avec réception", elle résume le nombre de
+chaque qualité de réception relevée sur la série.
+
+Les colonnes "Mordus" et "Ace ou bonne reception" sont coloriées automatiquement par le
+script (`Code.gs`) à l'insertion de la ligne :
+
+| Colonne | Rouge | Orange | Vert |
+|---|---|---|---|
+| Mordus | + de la moitié de la série en mordus | exactement la moitié | - de la moitié |
+| Ace ou bonne reception | + de bonne réception que d'ace | autant des deux | + d'ace que de bonne réception |
 
 ## Utilisation rapide
 

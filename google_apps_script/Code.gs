@@ -13,7 +13,12 @@
  *    par série envoyée (résumé, pas le détail service par service — pour ça
  *    il y a l'export CSV) :
  *    Date | Classe | Eleve | Nombre de services | Objectif (zones) | Mode
- *    | Services dans la zone visee | Ace ou bonne reception
+ *    | Trajectoire dominante | Mordus | Services dans la zone visee
+ *    | Ace ou bonne reception
+ *
+ *    Les colonnes "Mordus" (8) et "Ace ou bonne reception" (10) sont
+ *    coloriées automatiquement à l'insertion (voir _mordusColor et
+ *    _receptionColor ci-dessous).
  * 4. Déployer > Nouveau déploiement > type "Application Web".
  *    - Exécuter en tant que : Moi
  *    - Qui a accès : Tous les utilisateurs
@@ -25,6 +30,14 @@
  * Déployer > Gérer les déploiements > icône crayon > Nouvelle version,
  * sinon l'URL continuera d'exécuter l'ancienne version du code.
  */
+
+// Position (1-indexée) des colonnes coloriées, selon l'ordre envoyé par l'appli.
+var MORDUS_COLUMN = 8;
+var RECEPTION_COLUMN = 10;
+
+var COLOR_RED = '#F4CCCC';
+var COLOR_ORANGE = '#FCE5CD';
+var COLOR_GREEN = '#D9EAD3';
 
 function doPost(e) {
   try {
@@ -42,10 +55,45 @@ function doPost(e) {
     range.setNumberFormat('@');
     range.setValues(rows);
 
+    for (var i = 0; i < rows.length; i++) {
+      var rowNum = startRow + i;
+      var mordusColor = _mordusColor(rows[i][MORDUS_COLUMN - 1]);
+      if (mordusColor) sheet.getRange(rowNum, MORDUS_COLUMN).setBackground(mordusColor);
+      var receptionColor = _receptionColor(rows[i][RECEPTION_COLUMN - 1]);
+      if (receptionColor) sheet.getRange(rowNum, RECEPTION_COLUMN).setBackground(receptionColor);
+    }
+
     return _jsonResponse({status: 'ok', inserted: rows.length});
   } catch (err) {
     return _jsonResponse({status: 'error', message: err.message || String(err)});
   }
+}
+
+// "3 / 10" -> plus de la moitié de mordus = rouge, exactement la moitié =
+// orange, moins de la moitié = vert. Valeur non reconnue -> pas de couleur.
+function _mordusColor(text) {
+  var m = /^(\d+)\s*\/\s*(\d+)$/.exec(String(text || ''));
+  if (!m) return null;
+  var faults = parseInt(m[1], 10);
+  var total = parseInt(m[2], 10);
+  if (total === 0) return null;
+  var ratio = faults / total;
+  if (ratio > 0.5) return COLOR_RED;
+  if (ratio === 0.5) return COLOR_ORANGE;
+  return COLOR_GREEN;
+}
+
+// "2 Ace / 1 Bonne réception" -> plus d'ace que de bonne réception = vert,
+// autant des deux = orange, plus de bonne réception que d'ace = rouge.
+// Case vide (mode sans réception) -> pas de couleur.
+function _receptionColor(text) {
+  var m = /^(\d+)\s*Ace\s*\/\s*(\d+)\s*Bonne/.exec(String(text || ''));
+  if (!m) return null;
+  var ace = parseInt(m[1], 10);
+  var bonne = parseInt(m[2], 10);
+  if (ace > bonne) return COLOR_GREEN;
+  if (ace === bonne) return COLOR_ORANGE;
+  return COLOR_RED;
 }
 
 function _jsonResponse(obj) {

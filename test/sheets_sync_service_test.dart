@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:volleystats_eps/models/court_zone.dart';
+import 'package:volleystats_eps/models/serve_enums.dart';
 import 'package:volleystats_eps/models/session.dart';
 import 'package:volleystats_eps/services/demo_data_service.dart';
 import 'package:volleystats_eps/services/sheets_sync_service.dart';
@@ -22,10 +23,23 @@ void main() {
     expect(row[4], contains('5'));
     expect(row[4], contains('6'));
     expect(row[5], 'Avec réception');
+    // La série de démo alterne tendu/cloche service par service (5 de chaque) : égalité.
+    expect(row[6], 'Mixte');
+    // 2 fautes de pied sur les 10 services de la série de démo (§30).
+    expect(row[7], '2 / 10');
     // La série de démo a 6 services dans la zone 5 et 1 dans la zone 6 (§30).
-    expect(row[6], '7 / 10');
+    expect(row[8], '7 / 10');
     // Aucune réception relevée dans la série de démo (construite pour le mode sans réception).
-    expect(row[7], '0 Ace / 0 Bonne réception');
+    expect(row[9], '0 Ace / 0 Bonne réception');
+  });
+
+  test('indique la trajectoire dominante, ou "Mixte" en cas d\'égalité', () {
+    final session = DemoDataService.buildDemoSession();
+    final allTendue = session.copyWith(serves: [for (final s in session.serves) s.copyWith(trajectory: ServeTrajectory.tendue)]);
+    final allCloche = session.copyWith(serves: [for (final s in session.serves) s.copyWith(trajectory: ServeTrajectory.cloche)]);
+
+    expect(SheetsSyncService.summaryRow(allTendue)[6], 'Tendu');
+    expect(SheetsSyncService.summaryRow(allCloche)[6], 'Cloche');
   });
 
   test('reconnaît les 3 zones avant comme "Services courts"', () {
@@ -68,7 +82,7 @@ void main() {
     final row = SheetsSyncService.summaryRow(session);
 
     expect(row[5], 'Sans réception');
-    expect(row[7], '');
+    expect(row[9], '');
   });
 
   test('retire le segment /u/<n>/ ajouté par Google en multi-comptes', () {
